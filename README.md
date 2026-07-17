@@ -1,4 +1,4 @@
-# Minor Project Lab
+# Misinformation Cascading
 
 ## Project Structure
 ```text
