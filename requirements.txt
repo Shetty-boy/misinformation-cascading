@@ -1,0 +1,28 @@
+# Core Data Science & Scientific Computing
+numpy==1.26.4
+pandas==2.2.2
+scipy==1.13.1
+
+# Graph Processing & Network Analysis
+networkx==3.3
+
+# Machine Learning & Feature Engineering
+scikit-learn==1.4.2.post1
+
+# Deep Learning & Graph Neural Networks (Optional / Standard Base)
+# torch==2.3.0
+# torch-geometric==2.5.3
+
+# Visualization
+matplotlib==3.8.4
+seaborn==0.13.2
+
+# Interactive Development & Notebooks
+jupyterlab==4.1.6
+ipykernel==6.29.4
+tqdm==4.66.4
+
+# Testing & Code Quality
+pytest==8.1.1
+pytest-cov==5.0.0
+pytest-mock==3.14.0
