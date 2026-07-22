@@ -26,6 +26,7 @@ scikit-learn==1.5.0
 xgboost==2.0.3
 statsmodels==0.14.2
 networkx==3.3
+ndlib==5.1.1
 
 # --- Deep learning / GNN ---
 torch==2.3.1
