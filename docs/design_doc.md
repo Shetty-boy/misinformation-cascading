@@ -2,7 +2,8 @@
 
 ## Problem Statement
 
-Misinformation on social media causes measurable harm in proportion to how long it circulates before being flagged — yet most rumor-detection systems either classify only after a cascade has fully played out (too late to intervene) or apply a fixed observation window regardless of how a specific rumor is actually spreading (wasteful for fast, obvious cases; premature for slow, ambiguous ones). Separately, existing rumor-detection models are near-universally evaluated and run on a single machine, leaving open whether they can process the cascade volumes real platforms generate. CASCADE2VEC addresses both gaps: an adaptive, per-cascade stopping mechanism for early detection, built on a distributed graph pipeline (Apache Spark GraphX/GraphFrames) that scales to large cascade volumes.
+Misinformation on social media causes measurable harm in proportion to how long it circulates before being flagged — yet most rumor-detection systems either classify only after a cascade has fully played out (too late to intervene) or apply a fixe
+d observation window regardless of how a specific rumor is actually spreading (wasteful for fast, obvious cases; premature for slow, ambiguous ones). Separately, existing rumor-detection models are near-universally evaluated and run on a single machine, leaving open whether they can process the cascade volumes real platforms generate. CASCADE2VEC addresses both gaps: an adaptive, per-cascade stopping mechanism for early detection, built on a distributed graph pipeline (Apache Spark GraphX/GraphFrames) that scales to large cascade volumes.
 
 ## Hypotheses
 
