@@ -60,17 +60,10 @@ def graph_summary_stats(graph: GraphFrame) -> DataFrame:
     )
 
     # --- Connected components ---
-    # connectedComponents assigns each node a component_id.
-    # A cascade is "connected" if all its nodes share one component_id.
-    logger.info("[stats] Running connectedComponents...")
-    cc = graph.connectedComponents()
-
-    # Count distinct components per cascade
-    components_per_cascade = (
-        cc
-        .groupBy("cascade_id")
-        .agg(F.countDistinct("component").alias("num_components"))
-    )
+    # Due to a GraphFrames 0.9.0 vs 0.8.3 JAR compatibility issue, 
+    # connectedComponents() throws a Py4JException. 
+    # Since these are reply trees, we can infer connectivity:
+    # If all nodes are reachable from the root (min_depth != -1), it's connected.
 
     # --- Max depth via shortestPaths from cascade roots ---
     # Roots are vertices with no incoming edges (parent_id IS NULL)
@@ -133,12 +126,11 @@ def graph_summary_stats(graph: GraphFrame) -> DataFrame:
     stats = (
         node_counts
         .join(edge_counts, on="cascade_id", how="left")
-        .join(components_per_cascade, on="cascade_id", how="left")
-        .join(max_depths.select("cascade_id", "max_depth"), on="cascade_id", how="left")
-        .fillna({"edge_count": 0, "num_components": 1, "max_depth": 0})
+        .join(max_depths.select("cascade_id", "max_depth", "min_depth"), on="cascade_id", how="left")
+        .fillna({"edge_count": 0, "max_depth": 0, "min_depth": 0})
         .withColumn("is_singleton", F.col("edge_count") == 0)
-        .withColumn("is_connected", F.col("num_components") == 1)
-        .drop("num_components")
+        .withColumn("is_connected", F.col("min_depth") != -1)
+        .drop("min_depth")
         .orderBy("cascade_id")
     )
 
