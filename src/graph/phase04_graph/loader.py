@@ -34,7 +34,7 @@ REQUIRED_COLUMNS = [
     "label",
 ]
 
-DEFAULT_DATA_PATH = "data/processed/02_ingestion/unified.parquet"
+DEFAULT_DATA_PATH = "data/processed/phase2_ingestion/unified.parquet"
 
 
 def get_spark(app_name: str = "cascade2vec-phase04") -> SparkSession:
