@@ -47,7 +47,7 @@ def generate_faithful_sample(n_nodes=50000, m_edges=2, beta=0.05, gamma=0.01, fr
         "total_infected": total_infected
     }
 
-def generate_scalable_volume(output_dir="data/processed/phase2_ingestion/", num_cascades=1000, avg_burstiness=50):
+def generate_scalable_volume(output_dir="data/processed/02_ingestion/", num_cascades=1000, avg_burstiness=50):
     """
     Generate massive volume using PySpark based on faithful parameters.
     """

@@ -6,12 +6,12 @@ deduplicates on tweet_id, and writes the unified Parquet file plus a
 data audit report.
 
 Usage:
-    python -m src.features.ingestion.ingest \
+    python -m src.features.phase02_ingestion.ingest \
         --pheme data/raw/pheme-rnr-dataset \
         --twitter15 data/raw/twitter15 \
         --twitter16 data/raw/twitter16 \
-        --out data/processed/phase2_ingestion \
-        --report experiments/logs/phase2_ingestion/data_audit.md
+        --out data/processed/02_ingestion \
+        --report experiments/logs/02_ingestion/data_audit.md
 """
 
 import argparse
@@ -212,8 +212,8 @@ def main() -> None:
     parser.add_argument("--pheme", default=None)
     parser.add_argument("--twitter15", default=None)
     parser.add_argument("--twitter16", default=None)
-    parser.add_argument("--out", default="data/processed/phase2_ingestion")
-    parser.add_argument("--report", default="experiments/logs/phase2_ingestion/data_audit.md")
+    parser.add_argument("--out", default="data/processed/02_ingestion")
+    parser.add_argument("--report", default="experiments/logs/02_ingestion/data_audit.md")
     args = parser.parse_args()
 
     run_ingestion(
