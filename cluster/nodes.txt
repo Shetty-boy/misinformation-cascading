@@ -1,0 +1,7 @@
+# One hostname per line — must match Tailscale MagicDNS names, not raw IPs.
+# This should mirror $HADOOP_HOME/etc/hadoop/workers exactly.
+# To add a node: append its hostname here AND to the Hadoop workers file,
+# then run cluster/setup_node.sh on the new machine. See cluster/README.md.
+
+laptop-a
+laptop-b
