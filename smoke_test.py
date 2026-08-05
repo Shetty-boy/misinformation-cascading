@@ -1,6 +1,6 @@
 # smoke_test.py
 from pyspark.sql import SparkSession
-spark = SparkSession.builder.appName('smoke_test').master('local[*]').getOrCreate()
+spark = SparkSession.builder.appName('smoke_test').master('local[*]').config("spark.jars.packages", "graphframes:graphframes:0.8.3-spark3.5-s_2.12").getOrCreate()
 df = spark.createDataFrame([(1,'a'),(2,'b')], ['id','val'])
 df.show()
 

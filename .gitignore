@@ -57,6 +57,8 @@ data/*
 !data/.gitkeep
 experiments/*
 !experiments/.gitkeep
+logs/*
+!logs/.gitkeep
 
 # IDEs / Editors
 .idea/
