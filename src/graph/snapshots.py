@@ -29,4 +29,14 @@ def get_snapshot(graph: GraphFrame, t_minutes: float) -> GraphFrame:
         how="inner"
     ).drop("id2")
 
+    # Guardrail: Ensure no temporal leakage
+    max_v_time = snapshot_vertices.select(F.max("timestamp")).collect()[0][0]
+    if max_v_time is not None:
+        assert max_v_time <= t_seconds, f"Temporal leakage: Vertex timestamp {max_v_time} exceeds {t_seconds}"
+        
+    if "timestamp" in snapshot_edges.columns:
+        max_e_time = snapshot_edges.select(F.max("timestamp")).collect()[0][0]
+        if max_e_time is not None:
+            assert max_e_time <= t_seconds, f"Temporal leakage: Edge timestamp {max_e_time} exceeds {t_seconds}"
+
     return GraphFrame(snapshot_vertices, snapshot_edges)
