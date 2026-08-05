@@ -43,6 +43,9 @@ misinformation-cascading/
 ```
 
 ## Setup & Installation
+
+**Prerequisite:** Java 17 must be installed on your system (required for Spark and GraphFrames to run).
+
 1. Create and activate a Python virtual environment:
    ```bash
    python -m venv venv
@@ -59,3 +62,8 @@ misinformation-cascading/
    ```bash
    pip install -e .
    ```
+4. Verify your installation by running the smoke test:
+   ```bash
+   python smoke_test.py
+   ```
+   Confirm you see "SMOKE TEST PASSED" before proceeding.
