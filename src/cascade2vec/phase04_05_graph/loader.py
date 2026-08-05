@@ -60,7 +60,7 @@ def get_spark(app_name: str = "cascade2vec-phase04") -> SparkSession:
         .config("spark.graphx.pregel.checkpointInterval", "2")
         .getOrCreate()
     )
-    spark.sparkContext.setCheckpointDir("experiments/logs/04_graph/checkpoints")
+    spark.sparkContext.setCheckpointDir("logs/phase04_05_graph/checkpoints")
     spark.sparkContext.setLogLevel("WARN")
     return spark
 

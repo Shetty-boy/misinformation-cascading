@@ -78,7 +78,11 @@ def graph_summary_stats(graph: GraphFrame) -> DataFrame:
     # Collect root ids for shortestPaths landmarks
     root_ids = [row["root_id"] for row in roots.select("root_id").collect()]
 
-    sp = graph.shortestPaths(landmarks=root_ids)
+    # Reverse edges so paths can traverse from leaf nodes up to the root
+    reversed_edges = edges.select(F.col("dst").alias("src"), F.col("src").alias("dst"), "cascade_id")
+    reversed_graph = GraphFrame(vertices, reversed_edges)
+
+    sp = reversed_graph.shortestPaths(landmarks=root_ids)
 
     # For each node, find the shortest path distance to its own cascade root
     roots_map = {row["root_id"]: row["cascade_id"] for row in roots.collect()}
