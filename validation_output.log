@@ -1,0 +1,75 @@
+26/07/24 13:25:16 WARN Utils: Your hostname, DESKTOP-VB88QR3 resolves to a loopback address: 127.0.1.1; using 10.255.255.254 instead (on interface lo)
+26/07/24 13:25:16 WARN Utils: Set SPARK_LOCAL_IP if you need to bind to another address
+:: loading settings :: url = jar:file:/home/dr_shetty/tools/spark-3.5.1-bin-hadoop3/jars/ivy-2.5.1.jar!/org/apache/ivy/core/settings/ivysettings.xml
+Ivy Default Cache set to: /home/dr_shetty/.ivy2/cache
+The jars for the packages stored in: /home/dr_shetty/.ivy2/jars
+graphframes#graphframes added as a dependency
+:: resolving dependencies :: org.apache.spark#spark-submit-parent-9ecf32db-b805-43ab-bc78-75643a1f3819;1.0
+	confs: [default]
+	found graphframes#graphframes;0.8.3-spark3.5-s_2.12 in spark-packages
+	found org.slf4j#slf4j-api;1.7.16 in central
+:: resolution report :: resolve 161ms :: artifacts dl 5ms
+	:: modules in use:
+	graphframes#graphframes;0.8.3-spark3.5-s_2.12 from spark-packages in [default]
+	org.slf4j#slf4j-api;1.7.16 from central in [default]
+	---------------------------------------------------------------------
+	|                  |            modules            ||   artifacts   |
+	|       conf       | number| search|dwnlded|evicted|| number|dwnlded|
+	---------------------------------------------------------------------
+	|      default     |   2   |   0   |   0   |   0   ||   2   |   0   |
+	---------------------------------------------------------------------
+:: retrieving :: org.apache.spark#spark-submit-parent-9ecf32db-b805-43ab-bc78-75643a1f3819
+	confs: [default]
+	0 artifacts copied, 2 already retrieved (0kB/4ms)
+26/07/24 13:25:16 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
+26/07/24 13:25:17 WARN Utils: Service 'SparkUI' could not bind on port 4040. Attempting port 4041.
+[Stage 0:>                                                          (0 + 1) / 1]                                                                                [build_graph] Dropped 1460 orphaned edge(s) (parent_id not found in the same cascade's vertex set).
+[Stage 49:>                                                         (0 + 3) / 3]                                                                                [Stage 61:>                 (0 + 3) / 3][Stage 62:>                 (0 + 3) / 3]                                                                                Test Cascades: ['552806610490646528', '544332847050670080', '552797154692300800', '498433651835940865', '499689349420568577']
+\n--- Validating Cascade: 552806610490646528 ---
+t=  1m | Nodes:    2 (Expected) vs    2 (Actual) | Edges:    1 (Expected) vs    1 (Actual)
+t=  2m | Nodes:    3 (Expected) vs    3 (Actual) | Edges:    2 (Expected) vs    2 (Actual)
+t=  5m | Nodes:    7 (Expected) vs    7 (Actual) | Edges:    6 (Expected) vs    6 (Actual)
+t= 10m | Nodes:   21 (Expected) vs   21 (Actual) | Edges:   20 (Expected) vs   20 (Actual)
+t= 15m | Nodes:   34 (Expected) vs   34 (Actual) | Edges:   33 (Expected) vs   33 (Actual)
+t= 30m | Nodes:   78 (Expected) vs   78 (Actual) | Edges:   77 (Expected) vs   77 (Actual)
+t= 60m | Nodes:  143 (Expected) vs  143 (Actual) | Edges:  142 (Expected) vs  142 (Actual)
+t=120m | Nodes:  231 (Expected) vs  231 (Actual) | Edges:  230 (Expected) vs  230 (Actual)
+\n--- Validating Cascade: 544332847050670080 ---
+t=  1m | Nodes:    1 (Expected) vs    1 (Actual) | Edges:    0 (Expected) vs    0 (Actual)
+t=  2m | Nodes:    1 (Expected) vs    1 (Actual) | Edges:    0 (Expected) vs    0 (Actual)
+t=  5m | Nodes:    3 (Expected) vs    3 (Actual) | Edges:    2 (Expected) vs    2 (Actual)
+t= 10m | Nodes:    4 (Expected) vs    4 (Actual) | Edges:    3 (Expected) vs    3 (Actual)
+t= 15m | Nodes:    5 (Expected) vs    5 (Actual) | Edges:    4 (Expected) vs    4 (Actual)
+t= 30m | Nodes:   12 (Expected) vs   12 (Actual) | Edges:   11 (Expected) vs   11 (Actual)
+t= 60m | Nodes:   19 (Expected) vs   19 (Actual) | Edges:   18 (Expected) vs   18 (Actual)
+t=120m | Nodes:   34 (Expected) vs   34 (Actual) | Edges:   33 (Expected) vs   33 (Actual)
+\n--- Validating Cascade: 552797154692300800 ---
+t=  1m | Nodes:    1 (Expected) vs    1 (Actual) | Edges:    0 (Expected) vs    0 (Actual)
+t=  2m | Nodes:    1 (Expected) vs    1 (Actual) | Edges:    0 (Expected) vs    0 (Actual)
+t=  5m | Nodes:    1 (Expected) vs    1 (Actual) | Edges:    0 (Expected) vs    0 (Actual)
+t= 10m | Nodes:    4 (Expected) vs    4 (Actual) | Edges:    3 (Expected) vs    3 (Actual)
+t= 15m | Nodes:    4 (Expected) vs    4 (Actual) | Edges:    3 (Expected) vs    3 (Actual)
+t= 30m | Nodes:    5 (Expected) vs    5 (Actual) | Edges:    4 (Expected) vs    4 (Actual)
+t= 60m | Nodes:    9 (Expected) vs    9 (Actual) | Edges:    8 (Expected) vs    8 (Actual)
+t=120m | Nodes:    9 (Expected) vs    9 (Actual) | Edges:    8 (Expected) vs    8 (Actual)
+\n--- Validating Cascade: 498433651835940865 ---
+t=  1m | Nodes:    1 (Expected) vs    1 (Actual) | Edges:    0 (Expected) vs    0 (Actual)
+t=  2m | Nodes:    1 (Expected) vs    1 (Actual) | Edges:    0 (Expected) vs    0 (Actual)
+t=  5m | Nodes:    1 (Expected) vs    1 (Actual) | Edges:    0 (Expected) vs    0 (Actual)
+t= 10m | Nodes:    3 (Expected) vs    3 (Actual) | Edges:    2 (Expected) vs    2 (Actual)
+t= 15m | Nodes:    5 (Expected) vs    5 (Actual) | Edges:    4 (Expected) vs    4 (Actual)
+t= 30m | Nodes:   25 (Expected) vs   25 (Actual) | Edges:   24 (Expected) vs   24 (Actual)
+t= 60m | Nodes:   70 (Expected) vs   70 (Actual) | Edges:   69 (Expected) vs   69 (Actual)
+t=120m | Nodes:  120 (Expected) vs  120 (Actual) | Edges:  118 (Expected) vs  118 (Actual)
+\n--- Validating Cascade: 499689349420568577 ---
+t=  1m | Nodes:    1 (Expected) vs    1 (Actual) | Edges:    0 (Expected) vs    0 (Actual)
+t=  2m | Nodes:    4 (Expected) vs    4 (Actual) | Edges:    3 (Expected) vs    3 (Actual)
+t=  5m | Nodes:    7 (Expected) vs    7 (Actual) | Edges:    6 (Expected) vs    6 (Actual)
+t= 10m | Nodes:   20 (Expected) vs   20 (Actual) | Edges:   19 (Expected) vs   19 (Actual)
+t= 15m | Nodes:   26 (Expected) vs   26 (Actual) | Edges:   25 (Expected) vs   25 (Actual)
+t= 30m | Nodes:   58 (Expected) vs   58 (Actual) | Edges:   56 (Expected) vs   56 (Actual)
+t= 60m | Nodes:  122 (Expected) vs  122 (Actual) | Edges:  117 (Expected) vs  117 (Actual)
+t=120m | Nodes:  157 (Expected) vs  157 (Actual) | Edges:  150 (Expected) vs  150 (Actual)
+\n✅ All snapshots matched manual computations exactly!

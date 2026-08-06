@@ -1,7 +1,7 @@
 """
 stats.py — Phase 4 Graph Construction
 ======================================
-Per-cascade graph summary statistics using GraphFrames built-in algorithms.
+Per-cascade graph summary statistics using Spark SQL recursive CTE (BFS).
 
 Public API:
     graph_summary_stats(graph) -> Spark DataFrame
@@ -11,9 +11,18 @@ Output columns:
     node_count   (int)  — number of vertices in this cascade
     edge_count   (int)  — number of edges (replies) in this cascade
     is_singleton (bool) — True if edge_count == 0
-    is_connected (bool) — True if all nodes reachable from root
-    max_depth    (int)  — longest path from root; -1 if unreachable nodes exist
-                          (indicates a broken tree / orphan remnant)
+    is_connected (bool) — True if all nodes were reached during BFS expansion
+    max_depth    (int)  — longest path from root. Disconnected nodes get NULL
+                          depth; is_connected=False for those cascades.
+
+Implementation:
+    Uses Spark SQL WITH RECURSIVE CTE (Spark 3.5+) for depth computation.
+    This is the correct scalable approach — no Python driver loop, no lineage
+    blowup, no manual checkpointing. Spark parallelises across cascades natively.
+
+Edge direction:
+    Edges are stored as src=parent_id → dst=reply_id (root → leaf direction).
+    BFS walks src→dst, i.e. from root downward — correct.
 """
 
 import logging
@@ -28,8 +37,9 @@ def graph_summary_stats(graph: GraphFrame) -> DataFrame:
     """
     Compute per-cascade summary statistics for the full GraphFrame.
 
-    Uses GraphFrames' connectedComponents for connectivity and
-    shortestPaths (from each cascade root) for max depth.
+    Uses a Spark SQL recursive CTE to BFS from each cascade root, computing
+    depth for every reachable node. Unreachable nodes get NULL depth and their
+    cascade is flagged is_connected=False.
 
     Parameters
     ----------
@@ -42,8 +52,17 @@ def graph_summary_stats(graph: GraphFrame) -> DataFrame:
         cascade_id, node_count, edge_count, is_singleton,
         is_connected, max_depth
     """
+    spark = graph.vertices.sparkSession
+
+    # Raise recursion limit above our known max depth (~231 + safety margin)
+    spark.conf.set("spark.sql.recursion.limit", "500")
+
     vertices = graph.vertices
     edges = graph.edges
+
+    # Register as temp views for SQL
+    vertices.createOrReplaceTempView("_stats_vertices")
+    edges.createOrReplaceTempView("_stats_edges")
 
     # --- Node count per cascade ---
     node_counts = (
@@ -59,70 +78,59 @@ def graph_summary_stats(graph: GraphFrame) -> DataFrame:
         .agg(F.count("src").alias("edge_count"))
     )
 
-    # --- Connected components ---
-    # Due to a GraphFrames 0.9.0 vs 0.8.3 JAR compatibility issue, 
-    # connectedComponents() throws a Py4JException. 
-    # Since these are reply trees, we can infer connectivity:
-    # If all nodes are reachable from the root (min_depth != -1), it's connected.
+    # --- BFS depth via Spark SQL recursive CTE ---
+    # Edges: src=parent → dst=reply (root→leaf direction), so walk src→dst.
+    # Base case: root nodes (parent_id IS NULL) get depth=0.
+    # Recursive step: children get parent_depth + 1.
+    logger.info("[stats] Computing BFS depths via recursive SQL CTE...")
 
-    # --- Max depth via shortestPaths from cascade roots ---
-    # Roots are vertices with no incoming edges (parent_id IS NULL)
-    roots = (
-        vertices
-        .filter(F.col("parent_id").isNull())
-        .select(F.col("id").alias("root_id"), "cascade_id")
+    depths_df = spark.sql("""
+        WITH RECURSIVE bfs (id, cascade_id, depth) AS (
+            -- Base case: roots (no parent)
+            SELECT id, cascade_id, 0 AS depth
+            FROM _stats_vertices
+            WHERE parent_id IS NULL
+
+            UNION ALL
+
+            -- Recursive: expand one level from current frontier
+            SELECT e.dst AS id,
+                   e.cascade_id,
+                   b.depth + 1 AS depth
+            FROM bfs b
+            INNER JOIN _stats_edges e
+                ON b.id = e.src
+                AND b.cascade_id = e.cascade_id
+        )
+        SELECT id, cascade_id, MIN(depth) AS depth_from_root
+        FROM bfs
+        GROUP BY id, cascade_id
+    """)
+
+    # Left-join all vertices to depths — unreachable nodes get NULL depth
+    all_depths = (
+        vertices.select("id", "cascade_id")
+        .join(depths_df, on=["id", "cascade_id"], how="left")
     )
 
-    logger.info("[stats] Running shortestPaths from %d roots...", roots.count())
-
-    # Collect root ids for shortestPaths landmarks
-    root_ids = [row["root_id"] for row in roots.select("root_id").collect()]
-
-    # Reverse edges so paths can traverse from leaf nodes up to the root
-    reversed_edges = edges.select(F.col("dst").alias("src"), F.col("src").alias("dst"), "cascade_id")
-    reversed_graph = GraphFrame(vertices, reversed_edges)
-
-    sp = reversed_graph.shortestPaths(landmarks=root_ids)
-
-    # For each node, find the shortest path distance to its own cascade root
-    roots_map = {row["root_id"]: row["cascade_id"] for row in roots.collect()}
-
-    # Extract the distance to own-cascade root from the distances map column
-    # distances is a MapType(StringType, IntegerType)
-    # We pick the distance to the root that shares this node's cascade_id
-    @F.udf("int")
-    def extract_own_root_distance(cascade_id, distances):
-        if distances is None:
-            return -1
-        # Find the root that belongs to this cascade
-        for root_id, cid in roots_map.items():
-            if cid == cascade_id and root_id in distances:
-                return int(distances[root_id])
-        return -1
-
-    sp_with_depth = sp.withColumn(
-        "depth_from_root",
-        extract_own_root_distance(F.col("cascade_id"), F.col("distances")),
-    )
-
-    # Max depth per cascade (if any node has depth -1, cascade may have a cycle)
+    # Max depth per cascade; count NULLs to flag disconnected cascades
     max_depths = (
-        sp_with_depth
+        all_depths
         .groupBy("cascade_id")
         .agg(
             F.max("depth_from_root").alias("max_depth"),
-            F.min("depth_from_root").alias("min_depth"),
+            F.sum(
+                F.when(F.col("depth_from_root").isNull(), 1).otherwise(0)
+            ).alias("unreachable_count")
         )
     )
 
-    # Log cascades with unreachable nodes (min_depth == -1 indicates broken paths)
-    unreachable = max_depths.filter(F.col("min_depth") == -1)
-    n_unreachable = unreachable.count()
+    # Log disconnected cascades
+    n_unreachable = max_depths.filter(F.col("unreachable_count") > 0).count()
     if n_unreachable > 0:
         logger.warning(
-            "[stats] %d cascade(s) have nodes unreachable from root "
-            "(possible non-trivial cycles or broken tree structure). "
-            "max_depth is set to -1 for these cascades.",
+            "[stats] %d cascade(s) have unreachable nodes "
+            "(orphaned subtrees — is_connected=False, depth=NULL for those nodes).",
             n_unreachable,
         )
 
@@ -130,11 +138,14 @@ def graph_summary_stats(graph: GraphFrame) -> DataFrame:
     stats = (
         node_counts
         .join(edge_counts, on="cascade_id", how="left")
-        .join(max_depths.select("cascade_id", "max_depth", "min_depth"), on="cascade_id", how="left")
-        .fillna({"edge_count": 0, "max_depth": 0, "min_depth": 0})
+        .join(
+            max_depths.select("cascade_id", "max_depth", "unreachable_count"),
+            on="cascade_id", how="left"
+        )
+        .fillna({"edge_count": 0, "max_depth": 0, "unreachable_count": 0})
         .withColumn("is_singleton", F.col("edge_count") == 0)
-        .withColumn("is_connected", F.col("min_depth") != -1)
-        .drop("min_depth")
+        .withColumn("is_connected", F.col("unreachable_count") == 0)
+        .drop("unreachable_count")
         .orderBy("cascade_id")
     )
 

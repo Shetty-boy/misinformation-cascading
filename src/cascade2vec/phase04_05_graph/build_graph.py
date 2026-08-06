@@ -314,7 +314,7 @@ def main():
     End-to-end pipeline: load data → build graph → write vertices/edges
     → write singleton list → write summary stats.
 
-    Outputs (all in data/processed/04_graph/):
+    Outputs (all in data/processed/phase04_05_graph/):
         vertices.parquet
         edges.parquet
         singletons.parquet

@@ -5,7 +5,7 @@ Loads the unified Phase 2 processed dataset into a PySpark DataFrame,
 validating that the expected schema columns are present.
 
 Usage:
-    from src.graph.phase04_graph.loader import load_unified, get_spark
+    from cascade2vec.phase04_05_graph.loader import load_unified, get_spark
     spark = get_spark()
     df = load_unified(spark)
 """
@@ -56,6 +56,8 @@ def get_spark(app_name: str = "cascade2vec-phase04") -> SparkSession:
         SparkSession.builder
         .appName(app_name)
         .config("spark.jars.packages", jar_package)
+        .config("spark.driver.memory", "4g")
+        .config("spark.sql.shuffle.partitions", "50")
         # Checkpoint dir is required by GraphFrames' connectedComponents
         .config("spark.graphx.pregel.checkpointInterval", "2")
         .getOrCreate()

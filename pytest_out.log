@@ -1,0 +1,31 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.2.2, pluggy-1.6.0 -- /home/dr_shetty/misinformation-cascading/venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/dr_shetty/misinformation-cascading
+configfile: pyproject.toml
+plugins: cov-5.0.0, anyio-4.14.2
+collecting ... collected 21 items
+
+tests/phase04_05_graph/test_build_graph.py::TestToVertices::test_renames_tweet_id_to_id PASSED [  4%]
+tests/phase04_05_graph/test_build_graph.py::TestToVertices::test_preserves_all_other_columns PASSED [  9%]
+tests/phase04_05_graph/test_build_graph.py::TestToVertices::test_row_count_unchanged PASSED [ 14%]
+tests/phase04_05_graph/test_build_graph.py::TestToEdges::test_drops_root_tweet PASSED [ 19%]
+tests/phase04_05_graph/test_build_graph.py::TestToEdges::test_correct_edge_count PASSED [ 23%]
+tests/phase04_05_graph/test_build_graph.py::TestToEdges::test_edge_columns_are_src_dst PASSED [ 28%]
+tests/phase04_05_graph/test_build_graph.py::TestToEdges::test_drops_duplicate_edges PASSED [ 33%]
+tests/phase04_05_graph/test_build_graph.py::TestToEdges::test_drops_self_loops PASSED [ 38%]
+tests/phase04_05_graph/test_build_graph.py::TestToEdges::test_drops_orphaned_edges PASSED [ 42%]
+tests/phase04_05_graph/test_build_graph.py::TestFlagSingletons::test_normal_cascade_not_singleton PASSED [ 47%]
+tests/phase04_05_graph/test_build_graph.py::TestFlagSingletons::test_singleton_detected PASSED [ 52%]
+tests/phase04_05_graph/test_build_graph.py::TestGetCascadeSubgraph::test_subgraph_isolates_correct_cascade PASSED [ 57%]
+tests/phase04_05_graph/test_build_graph.py::TestGetCascadeSubgraph::test_subgraph_preserves_all_vertex_columns PASSED [ 61%]
+tests/phase04_05_graph/test_build_graph.py::TestGetCascadeSubgraph::test_subgraph_has_correct_vertex_count PASSED [ 66%]
+tests/phase04_05_graph/test_build_graph.py::TestGetCascadeSubgraph::test_subgraph_has_correct_edge_count PASSED [ 71%]
+tests/phase04_05_graph/test_build_graph.py::TestGetCascadeSubgraph::test_subgraph_no_dangling_edges PASSED [ 76%]
+tests/phase04_05_graph/test_build_graph.py::TestGetCascadeSubgraph::test_singleton_subgraph_has_empty_edges PASSED [ 80%]
+tests/phase04_05_graph/test_snapshots.py::test_get_snapshot_1_minute PASSED [ 85%]
+tests/phase04_05_graph/test_snapshots.py::test_get_snapshot_2_minutes PASSED [ 90%]
+tests/phase04_05_graph/test_snapshots.py::test_get_snapshot_5_minutes PASSED [ 95%]
+tests/phase04_05_graph/test_snapshots.py::test_get_snapshot_0_minutes PASSED [100%]
+
+============================= 21 passed in 28.93s ==============================
