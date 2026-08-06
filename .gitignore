@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
 
 # C extensions
 *.so
@@ -41,24 +42,29 @@ coverage.xml
 .pytest_cache/
 
 # Jupyter Notebook
-.ipynb_checkpoints
+.ipynb_checkpoints/
 
 # Environments
 .env
-.venv
+.venv/
 env/
 venv/
 ENV/
 env.bak/
 venv.bak/
 
+# Spark
+.sparkStaging/
+.metastore_db/
+
 # Data and Experiments
-data/*
+data/raw/
+data/processed/
+data/external/
+*.parquet
 !data/.gitkeep
 experiments/*
 !experiments/.gitkeep
-logs/*
-!logs/.gitkeep
 
 # IDEs / Editors
 .idea/
@@ -66,3 +72,4 @@ logs/*
 *.swp
 *.swo
 .DS_Store
+data/*.tar.bz2
