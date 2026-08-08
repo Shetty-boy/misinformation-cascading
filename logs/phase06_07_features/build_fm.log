@@ -1,0 +1,84 @@
+nohup: ignoring input
+26/08/08 17:11:10 WARN Utils: Your hostname, HP resolves to a loopback address: 127.0.1.1; using 10.255.255.254 instead (on interface lo)
+26/08/08 17:11:10 WARN Utils: Set SPARK_LOCAL_IP if you need to bind to another address
+:: loading settings :: url = jar:file:/home/omen/tools/spark-3.5.1-bin-hadoop3/jars/ivy-2.5.1.jar!/org/apache/ivy/core/settings/ivysettings.xml
+Ivy Default Cache set to: /home/omen/.ivy2/cache
+The jars for the packages stored in: /home/omen/.ivy2/jars
+graphframes#graphframes added as a dependency
+:: resolving dependencies :: org.apache.spark#spark-submit-parent-95ba0ff6-7fcf-41ab-9f12-06ef97d7173a;1.0
+	confs: [default]
+	found graphframes#graphframes;0.8.3-spark3.5-s_2.12 in spark-packages
+	found org.slf4j#slf4j-api;1.7.16 in central
+:: resolution report :: resolve 202ms :: artifacts dl 8ms
+	:: modules in use:
+	graphframes#graphframes;0.8.3-spark3.5-s_2.12 from spark-packages in [default]
+	org.slf4j#slf4j-api;1.7.16 from central in [default]
+	---------------------------------------------------------------------
+	|                  |            modules            ||   artifacts   |
+	|       conf       | number| search|dwnlded|evicted|| number|dwnlded|
+	---------------------------------------------------------------------
+	|      default     |   2   |   0   |   0   |   0   ||   2   |   0   |
+	---------------------------------------------------------------------
+:: retrieving :: org.apache.spark#spark-submit-parent-95ba0ff6-7fcf-41ab-9f12-06ef97d7173a
+	confs: [default]
+	0 artifacts copied, 2 already retrieved (0kB/5ms)
+26/08/08 17:11:11 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
+26/08/08 17:11:12 WARN Utils: Service 'SparkUI' could not bind on port 4040. Attempting port 4041.
+INFO: [build_fm] Loading unified dataset...
+INFO: [loader] Reading unified dataset from data/processed/phase02_ingestion/unified.parquet
+INFO: [loader] Loaded 102440 rows from unified dataset.
+[Stage 4:=======================================>                   (2 + 1) / 3]                                                                                INFO: [build_fm] Label map built: 5802 cascades
+INFO: [build_graph] to_vertices: 102440 vertices total.
+INFO: [build_graph] to_edges: 96638 rows after dropping roots.
+WARNING: [build_graph] Dropped 1460 orphaned edge(s) (parent_id not found in the same cascade's vertex set).
+[Stage 32:======================================>                   (2 + 1) / 3]                                                                                INFO: [build_graph] to_edges: 95178 clean edges.
+INFO: [build_graph] Built full GraphFrame: 102440 vertices, 95178 edges.
+INFO: [build_fm] Processing 5802 cascades × 8 time windows...
+INFO: [build_fm] Cascade 0 / 5802 (0.0s elapsed)
+[Stage 49:>                                                         (0 + 3) / 3]                                                                                [Stage 60:>                 (0 + 3) / 3][Stage 61:>                 (0 + 3) / 3][Stage 60:>                 (0 + 3) / 3][Stage 61:============>     (2 + 1) / 3]                                                                                [Stage 60:======================================>                   (2 + 1) / 3]                                                                                INFO: ------------------
+INFO: Iteration 0
+INFO: Frontier = 1 nodes
+INFO: Insufficient temporal observations (n=0 intervals) for std_interarrival/burstiness; setting to 0.0
+INFO: ------------------
+INFO: Iteration 0
+INFO: Frontier = 1 nodes
+INFO: Insufficient temporal observations (n=0 intervals) for std_interarrival/burstiness; setting to 0.0
+INFO: ------------------
+INFO: Iteration 0
+INFO: Frontier = 1 nodes
+INFO: ------------------
+INFO: Iteration 1
+INFO: Frontier = 3
+INFO: ------------------
+INFO: Iteration 0
+INFO: Frontier = 1 nodes
+INFO: ------------------
+INFO: Iteration 1
+INFO: Frontier = 3
+INFO: ------------------
+INFO: Iteration 0
+INFO: Frontier = 1 nodes
+INFO: ------------------
+INFO: Iteration 1
+INFO: Frontier = 3
+INFO: ------------------
+INFO: Iteration 0
+INFO: Frontier = 1 nodes
+INFO: ------------------
+INFO: Iteration 1
+INFO: Frontier = 3
+INFO: ------------------
+INFO: Iteration 0
+INFO: Frontier = 1 nodes
+INFO: ------------------
+INFO: Iteration 1
+INFO: Frontier = 3
+INFO: ------------------
+INFO: Iteration 0
+INFO: Frontier = 1 nodes
+INFO: ------------------
+INFO: Iteration 1
+INFO: Frontier = 4
+[Stage 541:=========================================================(3 + 0) / 3][Stage 542:>                                                        (0 + 3) / 3]                                                                                [Stage 545:>                                                        (0 + 3) / 3][Stage 547:>                                                        (0 + 0) / 1]                                                                                

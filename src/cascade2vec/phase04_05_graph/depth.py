@@ -2,9 +2,25 @@
 depth.py — Distributed Graph Traversal Engine
 =============================================
 Iterative frontier expansion (BFS) to compute graph depth.
+
+# DAG GUARANTEE
+# This BFS does NOT need to track visited nodes (no left_anti join or deduplication).
+# That is safe for two combined reasons:
+#
+#   1. TEMPORAL ORDERING: Twitter's reply semantics guarantee that a reply is always
+#      chronologically *after* its parent tweet. No edge can point backwards in time,
+#      so no cycle (which would require traversing backwards against time) is possible.
+#
+#   2. IN-DEGREE <= 1: Each tweet has at most one parent_id, so each node has at
+#      most one incoming edge. Together with (1), this proves the graph is a strict
+#      forest (a set of disjoint trees).
+#
+# NOTE: In-degree <= 1 alone is INSUFFICIENT. A 2-node cycle A -> B -> A has
+# in-degree 1 at both A and B. Temporal ordering is the argument that breaks cycles.
 """
 
 import logging
+from functools import reduce
 from pyspark.sql import DataFrame
 import pyspark.sql.functions as F
 
@@ -56,8 +72,13 @@ def compute_depths(vertices_df: DataFrame, edges_df: DataFrame) -> DataFrame:
             (F.col("depth") + 1).alias("depth")
         )
         
-        # Since MAX IN-DEGREE = 1, we don't need deduplication or left_anti join
-        new_frontier = children.localCheckpoint()
+        # Temporal ordering + in-degree <= 1 => forest, no cycles possible.
+        # No deduplication or visited-set tracking needed (see module docstring).
+        # Use persist() instead of localCheckpoint() to break query plan lineage
+        # without triggering the SIGTERM signal-handler re-entry that corrupts
+        # the Py4J connection in test environments (localCheckpoint calls
+        # sc.cancelAllJobs() on teardown, which is a reentrant JVM call).
+        new_frontier = children.persist()
         frontier_count = new_frontier.count()
         
         if frontier_count == 0:
@@ -70,7 +91,6 @@ def compute_depths(vertices_df: DataFrame, edges_df: DataFrame) -> DataFrame:
         depths_list.append(new_frontier)
         frontier = new_frontier
 
-    from functools import reduce
     all_depths = reduce(DataFrame.unionAll, depths_list)
 
     # Join Back -> NULL -> unreachable
