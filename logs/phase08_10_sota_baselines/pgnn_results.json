@@ -1,0 +1,31 @@
+{
+  "model": "PGNN",
+  "hyperparameters": {
+    "model": "PGNN",
+    "seed": 42,
+    "tfidf_max_features": 5000,
+    "hidden_dim": 128,
+    "attn_dim": 64,
+    "mlp_hidden": 128,
+    "dropout": 0.5,
+    "lr": 0.0005,
+    "weight_decay": 0.0001,
+    "epochs": 50,
+    "batch_size": 64,
+    "patience": 10,
+    "optimizer": "Adam",
+    "loss": "CrossEntropyLoss (class-weighted)",
+    "num_gcn_layers": 2,
+    "pooling": "attention"
+  },
+  "best_val_macro_f1": 0.8563366171314075,
+  "test_metrics": {
+    "loss": 0.42869895960256194,
+    "macro_f1": 0.8237459807242911,
+    "weighted_f1": 0.8373493338743254,
+    "accuracy": 0.8340034462952326,
+    "roc_auc": 0.9232278949968244
+  },
+  "runtime_minutes": 0.17,
+  "seed": 42
+}

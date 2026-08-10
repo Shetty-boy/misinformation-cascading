@@ -1,0 +1,33 @@
+{
+  "model": "RP-DNN",
+  "hyperparameters": {
+    "model": "RP-DNN",
+    "seed": 42,
+    "vocab_size": 10000,
+    "embed_dim": 64,
+    "hidden_dim": 128,
+    "struct_dim": 2,
+    "struct_hidden": 64,
+    "mlp_hidden": 128,
+    "dropout": 0.5,
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "epochs": 50,
+    "batch_size": 128,
+    "patience": 10,
+    "optimizer": "Adam",
+    "loss": "CrossEntropyLoss (class-weighted)",
+    "max_len": 128,
+    "max_depth": 30
+  },
+  "best_val_macro_f1": 0.7942655246252677,
+  "test_metrics": {
+    "loss": 0.6628278935523912,
+    "macro_f1": 0.7709041951397757,
+    "weighted_f1": 0.7928800254281545,
+    "accuracy": 0.7914991384261918,
+    "roc_auc": 0.860886669959777
+  },
+  "runtime_minutes": 0.11,
+  "seed": 42
+}

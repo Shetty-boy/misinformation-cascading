@@ -1,0 +1,32 @@
+{
+  "model": "KPG-simplified",
+  "hyperparameters": {
+    "model": "KPG-simplified",
+    "seed": 42,
+    "tfidf_max_features": 5000,
+    "key_nodes_k": 20,
+    "hidden_dim": 128,
+    "mlp_hidden": 128,
+    "dropout": 0.5,
+    "lr": 0.0005,
+    "weight_decay": 0.0001,
+    "epochs": 50,
+    "batch_size": 64,
+    "patience": 10,
+    "optimizer": "Adam",
+    "loss": "CrossEntropyLoss (class-weighted)",
+    "num_gcn_layers": 2,
+    "pooling": "global_mean_pool",
+    "simplification": "Static betweenness centrality key-node selection (no RL)"
+  },
+  "best_val_macro_f1": 0.8610345421655612,
+  "test_metrics": {
+    "loss": 0.4602236968734222,
+    "macro_f1": 0.8310516634561071,
+    "weighted_f1": 0.8471647570927068,
+    "accuracy": 0.8460654796094199,
+    "roc_auc": 0.9187189800766824
+  },
+  "runtime_minutes": 0.25,
+  "seed": 42
+}
