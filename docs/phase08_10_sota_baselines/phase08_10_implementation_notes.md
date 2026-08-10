@@ -3,7 +3,7 @@
 ## Overview
 
 Four SOTA baselines were implemented for the binary rumour detection task.
-All trained on full final cascades only (see `data_interface_contract.md`).
+All trained on full final cascades only (see `phase08_10_data_interface_contract.md`).
 
 ---
 

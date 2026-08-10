@@ -3,7 +3,7 @@
 Source of truth for which features are approved for implementation.
 No feature may be implemented in `engineering.py` unless Status = **Approved**.
 
-Reference: [validated_features.md](file:///home/omen/projects/misinformation-cascading/docs/phase03_eda_leakage/validated_features.md)
+Reference: [validated_features.md](file:///home/omen/projects/misinformation-cascading/docs/phase03_eda_leakage/phase03_validated_features.md)
 
 | Feature | Previously Approved (Phase 3 EDA) | Newly Proposed (Phase 6) | Leakage Reviewed | Status |
 |---|---|---|---|---|

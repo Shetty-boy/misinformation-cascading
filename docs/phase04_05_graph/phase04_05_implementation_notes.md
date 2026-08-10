@@ -1,7 +1,7 @@
 # Phase 4-5: Graph Construction & Depth Computation
 
 **Status:** ✅ Complete
-**Log:** [`../../logs/phase04_05_graph/graph_stats.md`](../../logs/phase04_05_graph/graph_stats.md)
+**Log:** [`../../logs/phase04_05_graph/phase04_05_graph_stats.md`](../../logs/phase04_05_graph/phase04_05_graph_stats.md)
 
 ### What Was Done
 - Built propagation tree graph from `parent_id` structure

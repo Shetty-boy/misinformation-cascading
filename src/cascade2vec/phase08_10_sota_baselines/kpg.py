@@ -5,7 +5,7 @@ Reference: Original KPG paper uses reinforcement learning (REINFORCE) to train
 a key-node selector. This implementation uses static betweenness centrality
 selection instead (KPG-simplified). This is an independent engineering
 simplification, NOT an attributed ablation from the original paper.
-Deviation documented in docs/phase08_10_sota_baselines/implementation_notes.md.
+Deviation documented in docs/phase08_10_sota_baselines/phase08_10_implementation_notes.md.
 
 Architecture:
   - Select top-K nodes by approximate betweenness centrality (K=20)

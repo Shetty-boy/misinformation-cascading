@@ -9,7 +9,7 @@ Trains and evaluates three baseline classifiers for the Rumour Detection task:
 Task:
     Binary classification — rumour (1) vs non-rumour (0)
     Labels from 'label_binary' column in feature_matrix.parquet.
-    See docs/phase06_07_features/classification_protocol.md.
+    See docs/phase06_07_features/phase06_07_classification_protocol.md.
 
 Cross-validation:
     StratifiedGroupKFold(n_splits=5), groups=cascade_id
@@ -48,7 +48,7 @@ logger = logging.getLogger(__name__)
 
 # Paths
 FEATURE_MATRIX_PATH = "data/processed/phase06_07_features/feature_matrix.parquet"
-RESULTS_PATH = "logs/phase06_07_features/baseline_results.md"
+RESULTS_PATH = "logs/phase06_07_features/phase06_07_baseline_results.md"
 OUT_DIR = "logs/phase06_07_features"
 
 # Feature columns to use (exclude non-feature columns)

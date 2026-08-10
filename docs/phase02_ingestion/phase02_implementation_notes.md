@@ -1,7 +1,7 @@
 # Phase 2: Data Ingestion
 
 **Status:** ✅ Complete
-**Log:** [`../../logs/phase02_ingestion/data_audit.md`](../../logs/phase02_ingestion/data_audit.md)
+**Log:** [`../../logs/phase02_ingestion/phase02_data_audit.md`](../../logs/phase02_ingestion/phase02_data_audit.md)
 
 ### What Was Done
 - Parsed all PHEME JSON files into a unified flat parquet

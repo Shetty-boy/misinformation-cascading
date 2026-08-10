@@ -5,7 +5,7 @@ Reference: Wu et al., 2021
   "Rumor Detection Based On Propagation Graph Neural Network With Attention Mechanism"
 
 Implementation: Built from scratch using PyG MessagePassing (no official repo).
-Deviations documented in docs/phase08_10_sota_baselines/implementation_notes.md.
+Deviations documented in docs/phase08_10_sota_baselines/phase08_10_implementation_notes.md.
 
 Architecture:
   - 2-layer Gated Graph Propagation Network (GCN with LeakyReLU activation)

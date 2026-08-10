@@ -1,7 +1,7 @@
 # Phase 3: EDA & Leakage Audit
 
 **Status:** ✅ Complete
-**Doc:** [`validated_features.md`](validated_features.md)
+**Doc:** [`phase03_validated_features.md`](phase03_validated_features.md)
 
 ### What Was Done
 - Exploratory analysis of cascade structure, text, and temporal patterns

@@ -2,11 +2,11 @@
 
 **Status:** ✅ Complete
 **Docs:**
-- [`classification_protocol.md`](classification_protocol.md)
-- [`../../logs/phase06_07_features/feature_dictionary.md`](../../logs/phase06_07_features/feature_dictionary.md)
-- [`../../logs/phase06_07_features/baseline_results.md`](../../logs/phase06_07_features/baseline_results.md)
-- [`../../logs/phase06_07_features/feature_correlation.md`](../../logs/phase06_07_features/feature_correlation.md)
-- [`../../logs/phase06_07_features/leakage_report.md`](../../logs/phase06_07_features/leakage_report.md)
+- [`phase06_07_classification_protocol.md`](phase06_07_classification_protocol.md)
+- [`../../logs/phase06_07_features/phase06_07_feature_dictionary.md`](../../logs/phase06_07_features/phase06_07_feature_dictionary.md)
+- [`../../logs/phase06_07_features/phase06_07_baseline_results.md`](../../logs/phase06_07_features/phase06_07_baseline_results.md)
+- [`../../logs/phase06_07_features/phase06_07_feature_correlation.md`](../../logs/phase06_07_features/phase06_07_feature_correlation.md)
+- [`../../logs/phase06_07_features/phase06_07_leakage_report.md`](../../logs/phase06_07_features/phase06_07_leakage_report.md)
 
 ### Feature Set (19 features)
 Computed per `(cascade_id, t)` snapshot — no future lookahead.

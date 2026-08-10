@@ -5,7 +5,7 @@ Reference: Bian et al., AAAI 2020
   "Rumor Detection on Social Media with Bi-Directional Graph Convolutional Networks"
   
 Source: Adapted from safe-graph/GNN-FakeNews (MIT license, updated Dec 2025).
-  Deviations documented in docs/phase08_10_sota_baselines/implementation_notes.md.
+  Deviations documented in docs/phase08_10_sota_baselines/phase08_10_implementation_notes.md.
 
 Training protocol:
   - Fixed seed: SEED = 42

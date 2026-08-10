@@ -103,7 +103,7 @@ from the original paper). The original KPG uses reinforcement learning
 (REINFORCE algorithm) to train a key-node selector. We implement a static
 centrality-based variant due to the RL component's implementation complexity
 and training instability. This deviation is explicitly documented in
-`implementation_notes.md`.
+`phase08_10_implementation_notes.md`.
 
 **Input format:** PyG `Data` objects, one per cascade (pruned to key nodes)
 

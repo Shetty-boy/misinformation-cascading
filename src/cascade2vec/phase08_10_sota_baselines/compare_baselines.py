@@ -5,7 +5,7 @@ Loads results from:
   - Phase 6-7 simple baselines (LR, RF, XGBoost) re-evaluated on the fixed split
   - Phase 8-10 SOTA baselines (BiGCN, RP-DNN, PGNN, KPG-simplified) from JSON results
 
-Outputs: logs/phase08_10_sota_baselines/sota_comparison.md
+Outputs: logs/phase08_10_sota_baselines/phase08_10_sota_comparison.md
 
 Run:
     PYTHONPATH=src python src/cascade2vec/phase08_10_sota_baselines/compare_baselines.py

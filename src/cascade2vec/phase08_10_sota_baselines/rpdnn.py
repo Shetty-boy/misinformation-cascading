@@ -6,7 +6,7 @@ Reference: Bian et al., 2020
    for Early Rumor Detection in Social Media"
 
 Implementation: Built from scratch (no official PyTorch repo available).
-Deviations documented in docs/phase08_10_sota_baselines/implementation_notes.md.
+Deviations documented in docs/phase08_10_sota_baselines/phase08_10_implementation_notes.md.
 
 Architecture:
   - Branch 1: BiGRU over root tweet token sequence -> pooled text embedding

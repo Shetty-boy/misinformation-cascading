@@ -1,7 +1,7 @@
 # Phase 1: Data Acquisition
 
 **Status:** ✅ Complete
-**Source doc:** [`design_doc.md`](design_doc.md)
+**Source doc:** [`phase01_design_doc.md`](phase01_design_doc.md)
 
 ### What Was Done
 - Acquired PHEME dataset from Zubiaga et al. (2016)

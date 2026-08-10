@@ -99,7 +99,7 @@ def flag_suspicious_correlations(
 
     This function does NOT prune anything.  It only flags pairs whose absolute
     correlation exceeds `threshold`.  Pruning decisions are deferred to Phase 18
-    ablations — see logs/phase06_07_features/feature_correlation.md.
+    ablations — see logs/phase06_07_features/phase06_07_feature_correlation.md.
 
     Parameters
     ----------
