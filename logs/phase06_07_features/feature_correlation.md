@@ -7,17 +7,22 @@ Both Pearson and Spearman correlations are computed. Pairs with |correlation| > 
 are flagged. **No features are pruned here** — pruning decisions are explicitly
 deferred to Phase 18 ablations. See `phase18_eval/ablations.py`.
 
-> [!IMPORTANT]
-> This file will be populated after `build_feature_matrix.py` completes on the
-> real dataset (Step 10 of Phase 6-7 implementation).
-
 ---
 
-## Results (to be populated in Step 10)
+## Results (populated by Step 10)
 
 | Feature A | Feature B | Pearson | Spearman | Flagged |
 |---|---|---|---|---|
-| — | — | — | — | — |
+| node_count | edge_count | 0.9983 | 0.9992 | Yes |
+| node_count | root_degree | — | 0.9796 | Yes |
+| edge_count | leaf_count | — | 0.9666 | Yes |
+| node_count | avg_depth | — | 0.9618 | Yes |
+| tweets_per_minute | growth_velocity | 1.0 | 1.0 | Yes |
+| max_depth | avg_depth | 0.9512 | 0.9532 | Yes |
+| edge_count | root_degree | — | 0.9808 | Yes |
+| edge_count | avg_depth | — | 0.9624 | Yes |
+| node_count | leaf_count | — | 0.9677 | Yes |
+| leaf_count | root_degree | — | 0.9681 | Yes |
 
 ---
 

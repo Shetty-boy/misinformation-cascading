@@ -106,8 +106,8 @@ class TestSingletonCascade:
         v_rows = [("root", cid, None, 0)]
         e_rows = []
         snap = _make_graph(spark, v_rows, e_rows)
-
-        feats = _compute_snapshot_structural(snap, t_seconds=3600, cascade_id=cid)
+        snap_pd = {"vertices": snap.vertices.toPandas(), "edges": snap.edges.toPandas()}
+        feats = _compute_snapshot_structural(snap_pd, t_seconds=3600, cascade_id=cid)
 
         assert feats["node_count"] == 1
         assert feats["edge_count"] == 0
@@ -126,7 +126,7 @@ class TestSingletonCascade:
         cid = "singleton_cascade"
         v_rows = [("root", cid, None, 0)]
         v = _make_vertices(spark, v_rows)
-        feats = _compute_snapshot_temporal(v, t_seconds=3600)
+        feats = _compute_snapshot_temporal(v.toPandas(), t_seconds=3600)
 
         assert feats["std_interarrival"] == 0.0
         assert feats["burstiness"] == 0.0
@@ -152,7 +152,8 @@ class TestChainCascade:
             ("B", "C", cid),
         ]
         snap = _make_graph(spark, v_rows, e_rows)
-        feats = _compute_snapshot_structural(snap, t_seconds=3600, cascade_id=cid)
+        snap_pd = {"vertices": snap.vertices.toPandas(), "edges": snap.edges.toPandas()}
+        feats = _compute_snapshot_structural(snap_pd, t_seconds=3600, cascade_id=cid)
 
         assert feats["node_count"] == 4
         assert feats["edge_count"] == 3
@@ -186,7 +187,8 @@ class TestStarCascade:
             ("root", "C", cid),
         ]
         snap = _make_graph(spark, v_rows, e_rows)
-        feats = _compute_snapshot_structural(snap, t_seconds=3600, cascade_id=cid)
+        snap_pd = {"vertices": snap.vertices.toPandas(), "edges": snap.edges.toPandas()}
+        feats = _compute_snapshot_structural(snap_pd, t_seconds=3600, cascade_id=cid)
 
         assert feats["node_count"] == 4
         assert feats["edge_count"] == 3
@@ -218,7 +220,8 @@ class TestDisconnectedCascade:
             ("B", "C", cid),  # This sub-tree is disconnected from root
         ]
         snap = _make_graph(spark, v_rows, e_rows)
-        feats = _compute_snapshot_structural(snap, t_seconds=3600, cascade_id=cid)
+        snap_pd = {"vertices": snap.vertices.toPandas(), "edges": snap.edges.toPandas()}
+        feats = _compute_snapshot_structural(snap_pd, t_seconds=3600, cascade_id=cid)
 
         assert feats["node_count"] == 4
         # B and C are unreachable from root (since we use root's BFS only)
@@ -272,7 +275,8 @@ class TestTemporalCutoff:
         snap = get_snapshot(full_graph, t_minutes=1.0)  # t=60s
 
         # Manual computation using only pre-cutoff events: root + A
-        feats = _compute_snapshot_structural(snap, t_seconds=60.0, cascade_id=cid)
+        snap_pd = {"vertices": snap.vertices.toPandas(), "edges": snap.edges.toPandas()}
+        feats = _compute_snapshot_structural(snap_pd, t_seconds=60.0, cascade_id=cid)
 
         assert feats["node_count"] == 2    # root + A
         assert feats["edge_count"] == 1    # root -> A
@@ -309,7 +313,7 @@ class TestNumericalStability:
             ("A", cid, "root", 60),
         ]
         v = _make_vertices(spark, v_rows)
-        feats = _compute_snapshot_temporal(v, t_seconds=3600)
+        feats = _compute_snapshot_temporal(v.toPandas(), t_seconds=3600)
 
         # With exactly 1 interval, std_interarrival = 0.0 by convention
         assert feats["mean_interarrival"] == pytest.approx(60.0)
@@ -323,7 +327,8 @@ class TestNumericalStability:
         v_rows = [("root", cid, None, 0)]
         e_rows = []
         snap = _make_graph(spark, v_rows, e_rows)
-        feats = _compute_snapshot_structural(snap, t_seconds=3600, cascade_id=cid)
+        snap_pd = {"vertices": snap.vertices.toPandas(), "edges": snap.edges.toPandas()}
+        feats = _compute_snapshot_structural(snap_pd, t_seconds=3600, cascade_id=cid)
 
         assert feats["branching_factor"] == 0.0
         assert not math.isnan(feats["branching_factor"])

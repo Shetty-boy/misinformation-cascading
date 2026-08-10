@@ -1,91 +1,43 @@
 """
-build_feature_matrix.py — Phase 6 Feature Matrix Pipeline
-==========================================================
-Runs the full pipeline:
-    Cascade -> Snapshot -> Features -> Feature Matrix
-
-Output
-------
-data/processed/phase06_07_features/feature_matrix.parquet
-    One row per (cascade_id, t_minutes). Columns: all Phase 6A + 6B features,
-    plus 'label' (rumour / non-rumour from unified.parquet folder structure).
-
-Label source
-------------
-The 'label' column is read directly from unified.parquet. It contains only
-'rumour' and 'non-rumour' values (folder-based PHEME labeling). No annotation.json
-veracity labels (true/false/unverified) are used here — those are out of scope
-for Phase 6-7. See docs/phase06_07_features/classification_protocol.md.
-
-Leakage contract
-----------------
-assert_snapshot_is_clean() is called inside compute_features() for EVERY
-(cascade_id, t) pair. If it raises AssertionError the entire run fails immediately.
-Never downgrade this to a warning.
+build_feature_matrix_pandas.py — Phase 6 Feature Matrix Pipeline (Pandas)
+=========================================================================
+Runs the full pipeline using in-memory Pandas dataframes.
 """
 
 import logging
 import os
 import time
-
 import pandas as pd
 
 from cascade2vec.phase04_05_graph.loader import get_spark, load_unified
-from cascade2vec.phase04_05_graph.build_graph import (
-    to_vertices, to_edges, build_full_graph, get_cascade_subgraph,
-)
-from cascade2vec.phase06_07_features.engineering import compute_features
+from cascade2vec.phase04_05_graph.build_graph import to_vertices, to_edges
+from cascade2vec.phase06_07_features.engineering import compute_features_pandas
+from cascade2vec.phase02_ingestion.leakage_audit import flag_suspicious_correlations
 
 logger = logging.getLogger(__name__)
 
-# Observation time windows (minutes from cascade root)
 TIME_WINDOWS_MINUTES = [1, 2, 5, 10, 15, 30, 60, 120]
-
-# Velocity delta (must match engineering.py default)
 DELTA_T_MINUTES = 5.0
 
-# Output path
 OUT_DIR = "data/processed/phase06_07_features"
-OUT_PATH = f"{OUT_DIR}/feature_matrix.parquet"
-
+OUT_PATH = f"{OUT_DIR}/feature_matrix_pandas.parquet"
 
 def _get_cascade_label(cascade_id: str, label_map: dict) -> str:
-    """Look up the rumour/non-rumour label for a cascade."""
     return label_map.get(cascade_id, "unknown")
-
 
 def build_feature_matrix(
     limit_cascades: int | None = None,
     time_windows: list[float] = TIME_WINDOWS_MINUTES,
     skip_disconnected: bool = False,
 ) -> pd.DataFrame:
-    """
-    Build the full feature matrix.
-
-    Parameters
-    ----------
-    limit_cascades : int or None
-        If set, process only the first N cascades (for debugging/dry runs).
-    time_windows : list of float
-        Observation time windows in minutes.
-    skip_disconnected : bool
-        If True, exclude cascades that are known to be structurally disconnected
-        (edge_count < node_count - 1). Default False.
-
-    Returns
-    -------
-    pd.DataFrame
-        Feature matrix with one row per (cascade_id, t_minutes).
-    """
     os.makedirs(OUT_DIR, exist_ok=True)
 
-    spark = get_spark("cascade2vec-phase06-features")
+    spark = get_spark("cascade2vec-phase06-features-pandas")
     spark.sparkContext.setLogLevel("WARN")
 
     logger.info("[build_fm] Loading unified dataset...")
     df = load_unified(spark)
 
-    # Build cascade-level label map (rumour / non-rumour ONLY)
     label_map_pd = (
         df.select("cascade_id", "label")
         .distinct()
@@ -95,23 +47,24 @@ def build_feature_matrix(
     )
     logger.info("[build_fm] Label map built: %d cascades", len(label_map_pd))
 
-    # Build graph
-    vertices = to_vertices(df)
-    edges = to_edges(df, vertices=vertices)
-    full_graph = build_full_graph(vertices, edges)
+    # 1. Use Spark only once upfront
+    vertices_spark = to_vertices(df)
+    edges_spark = to_edges(df, vertices=vertices_spark)
+    
+    # Collect entirely to Pandas
+    logger.info("[build_fm] Collecting entire graph to Pandas...")
+    vertices_pd = vertices_spark.toPandas()
+    edges_pd = edges_spark.toPandas()
+    logger.info(f"[build_fm] Collected {len(vertices_pd)} vertices and {len(edges_pd)} edges.")
 
-    # Optionally load disconnected cascade list
     disc_set: set = set()
     if skip_disconnected:
         stats_path = "data/processed/phase04_05_graph/graph_stats.parquet"
         if os.path.exists(stats_path):
             stats_pd = pd.read_parquet(stats_path)
-            disc_set = set(
-                stats_pd[~stats_pd["is_connected"]]["cascade_id"].tolist()
-            )
+            disc_set = set(stats_pd[~stats_pd["is_connected"]]["cascade_id"].tolist())
             logger.info("[build_fm] Skipping %d disconnected cascades", len(disc_set))
 
-    # Cascade IDs to process
     all_cascade_ids = list(label_map_pd.keys())
     if skip_disconnected:
         all_cascade_ids = [c for c in all_cascade_ids if c not in disc_set]
@@ -124,23 +77,35 @@ def build_feature_matrix(
     rows = []
     t_start = time.time()
 
+    # Create GroupBy objects for faster extraction
+    v_grouped = vertices_pd.groupby('cascade_id')
+    e_grouped = edges_pd.groupby('cascade_id')
+
     for i, cid in enumerate(all_cascade_ids):
         if i % 100 == 0:
             elapsed = time.time() - t_start
             logger.info("[build_fm] Cascade %d / %d (%.1fs elapsed)", i, len(all_cascade_ids), elapsed)
 
         try:
-            subgraph = get_cascade_subgraph(full_graph, cid)
-            subgraph.vertices.cache()
-            subgraph.edges.cache()
+            # Extract subgraph for this cascade
+            try:
+                c_vertices = v_grouped.get_group(cid).copy()
+            except KeyError:
+                continue
+                
+            try:
+                c_edges = e_grouped.get_group(cid).copy()
+            except KeyError:
+                c_edges = pd.DataFrame(columns=edges_pd.columns)
 
             label = _get_cascade_label(cid, label_map_pd)
             prev_features: dict | None = None
 
             for t_min in sorted(time_windows):
                 try:
-                    feats = compute_features(
-                        subgraph=subgraph,
+                    feats = compute_features_pandas(
+                        vertices=c_vertices,
+                        edges=c_edges,
                         t_minutes=t_min,
                         cascade_id=cid,
                         prev_features=prev_features,
@@ -151,16 +116,10 @@ def build_feature_matrix(
                     rows.append(feats)
                     prev_features = feats
                 except AssertionError as e:
-                    # Leakage check failed — propagate immediately as hard failure
                     raise
                 except Exception as e:
-                    logger.warning(
-                        "[build_fm] Cascade %s at t=%smin failed: %s", cid, t_min, e
-                    )
+                    logger.warning("[build_fm] Cascade %s at t=%smin failed: %s", cid, t_min, e)
                     prev_features = None
-
-            subgraph.vertices.unpersist()
-            subgraph.edges.unpersist()
 
         except AssertionError:
             raise
@@ -177,18 +136,17 @@ def build_feature_matrix(
     result_df.to_parquet(OUT_PATH, index=False)
     logger.info("[build_fm] Feature matrix written to %s", OUT_PATH)
 
-    return result_df
+    logger.info("[build_fm] Generating feature correlation report...")
+    flag_suspicious_correlations(result_df)
 
+    return result_df
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-
     import argparse
-    parser = argparse.ArgumentParser(description="Build Phase 6 feature matrix")
-    parser.add_argument("--limit", type=int, default=None,
-                        help="Process only N cascades (for dry runs)")
-    parser.add_argument("--skip-disconnected", action="store_true",
-                        help="Exclude structurally disconnected cascades")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--limit", type=int, default=None)
+    parser.add_argument("--skip-disconnected", action="store_true")
     args = parser.parse_args()
 
     t0 = time.time()
@@ -198,9 +156,6 @@ if __name__ == "__main__":
     )
     t1 = time.time()
 
-    print(f"\n=== FEATURE MATRIX COMPLETE ===")
+    print(f"\\n=== FEATURE MATRIX COMPLETE ===")
     print(f"Shape: {df_result.shape}")
-    print(f"Columns: {df_result.columns.tolist()}")
-    print(f"Label distribution:\n{df_result['label'].value_counts()}")
     print(f"Total runtime: {t1 - t0:.1f}s")
-    print(f"Output: {OUT_PATH}")

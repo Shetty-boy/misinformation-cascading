@@ -44,9 +44,32 @@ def assert_snapshot_is_clean(snapshot: GraphFrame, t_seconds: float) -> None:
     AssertionError
         If any vertex or edge timestamp exceeds t_seconds.
     """
+    import pandas as pd
     from pyspark.sql import functions as F
 
-    # Check vertices
+    # Handle Pandas snapshot (dict with 'vertices' and 'edges' DataFrames)
+    if isinstance(snapshot, dict) and "vertices" in snapshot:
+        # Check vertices
+        if "timestamp" in snapshot["vertices"].columns:
+            max_v_ts = snapshot["vertices"]["timestamp"].max()
+            if pd.notna(max_v_ts):
+                assert max_v_ts <= t_seconds, (
+                    f"TEMPORAL LEAKAGE DETECTED: Vertex timestamp {max_v_ts}s "
+                    f"exceeds snapshot cutoff {t_seconds}s. "
+                    f"All features computed from this snapshot are invalid."
+                )
+
+        # Check edges
+        if "timestamp" in snapshot["edges"].columns:
+            max_e_ts = snapshot["edges"]["timestamp"].max()
+            if pd.notna(max_e_ts):
+                assert max_e_ts <= t_seconds, (
+                    f"TEMPORAL LEAKAGE DETECTED: Edge timestamp {max_e_ts}s "
+                    f"exceeds snapshot cutoff {t_seconds}s."
+                )
+        return
+
+    # Check vertices (PySpark)
     if "timestamp" in snapshot.vertices.columns:
         max_v_ts = snapshot.vertices.select(F.max("timestamp")).collect()[0][0]
         if max_v_ts is not None:
