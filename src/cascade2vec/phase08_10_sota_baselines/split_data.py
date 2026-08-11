@@ -31,7 +31,9 @@ OUT_FILE = os.path.join(OUT_DIR, "train_val_test_split.parquet")
 SRC_FILE = "data/processed/phase02_ingestion/unified.parquet"
 
 
-def build_split():
+import argparse
+
+def build_split(force: bool = False):
     print("[split_data] Loading unified dataset...")
     df = pd.read_parquet(SRC_FILE)
 
@@ -104,12 +106,36 @@ def build_split():
         print(f"  [{split_name}] n={len(sub)}, rumour_frac={rumour_frac:.3f}")
 
     os.makedirs(OUT_DIR, exist_ok=True)
+    
+    if os.path.exists(OUT_FILE):
+        if not force:
+            raise RuntimeError(f"Output file {OUT_FILE} already exists. Use --force to overwrite.")
+        else:
+            print("[split_data] --force passed. Checking for split assignment changes against existing file...")
+            try:
+                old_df = pd.read_parquet(OUT_FILE)
+                merged = split_df.merge(old_df, on="cascade_id", suffixes=("_new", "_old"))
+                diffs = merged[merged["split_new"] != merged["split_old"]]
+                if not diffs.empty:
+                    print("\n[WARNING] [WARNING] [WARNING]")
+                    print(f"!!! --force regeneration produced a DIFFERENT split assignment for {len(diffs)} cascades !!!")
+                    print("!!! This invalidates existing trained models evaluated on the old test split. !!!")
+                    print("[WARNING] [WARNING] [WARNING]\n")
+                else:
+                    print("[split_data] Verified: No cascade_id changed splits.")
+            except Exception as e:
+                print(f"[WARNING] Could not verify existing split file: {e}")
+
     split_df.to_parquet(OUT_FILE, index=False)
     print(f"[split_data] Saved split to {OUT_FILE}")
     return split_df
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--force", action="store_true", help="Overwrite existing split file")
+    args = parser.parse_args()
+    
     np.random.seed(SEED)
-    split_df = build_split()
+    split_df = build_split(force=args.force)
     print("[split_data] Done.")

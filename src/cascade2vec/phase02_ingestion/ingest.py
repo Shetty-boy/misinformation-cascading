@@ -147,6 +147,7 @@ def run_ingestion(
     twitter16_root: str | None,
     out_dir: str,
     report_path: str,
+    force: bool = False,
 ) -> pd.DataFrame:
     all_rows: list[dict] = []
     parse_failures: dict[str, int] = {}
@@ -191,6 +192,10 @@ def run_ingestion(
     # Write output
     os.makedirs(out_dir, exist_ok=True)
     out_path = os.path.join(out_dir, "unified.parquet")
+    
+    if os.path.exists(out_path) and not force:
+        raise RuntimeError(f"Output file {out_path} already exists. Use --force to overwrite.")
+        
     df.to_parquet(out_path, index=False)
     print(f"[ingest] Wrote unified dataset → {out_path}")
 
@@ -214,6 +219,7 @@ def main() -> None:
     parser.add_argument("--twitter16", default=None)
     parser.add_argument("--out", default="data/processed/phase02_ingestion")
     parser.add_argument("--report", default="logs/phase02_ingestion/phase02_data_audit.md")
+    parser.add_argument("--force", action="store_true", help="Overwrite existing output files")
     args = parser.parse_args()
 
     run_ingestion(
@@ -222,6 +228,7 @@ def main() -> None:
         twitter16_root=args.twitter16,
         out_dir=args.out,
         report_path=args.report,
+        force=args.force,
     )
 
 
