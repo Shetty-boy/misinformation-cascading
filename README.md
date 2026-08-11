@@ -3,40 +3,32 @@
 ## Project Structure
 ```text
 misinformation-cascading/
-├── src/cascade2vec/           # Installable Python package (pip install -e .)
+├── src/cascade2vec/           
 │   ├── phase02_ingestion/     # Schema, ingestion pipeline, dataset adapters
 │   ├── phase04_05_graph/      # Spark/GraphFrames graph construction & snapshots
-│   ├── phase06_07_features/   # Feature engineering & simple baselines
+│   ├── phase06_07_features/   # Feature engineering & baseline ML models
 │   ├── phase08_10_sota_baselines/ # BiGCN, KPG, PGNN, RP-DNN reimplementations
-│   ├── phase11_12_cascade2vec/    # Time-weighted GraphSAGE embedding model
-│   ├── phase13_14_adaptive_stopping/ # Adaptive θ(t) early-stopping mechanism
-│   ├── phase15_xai/           # SHAP / LIME explainability
-│   ├── phase16_17_scalability/ # Synthetic data generation & scalability benchmarks
-│   └── phase18_eval/          # Ablations, baseline comparison, statistical tests
+│   ├── phase11_12_cascade2vec/    # Time-weighted GraphSAGE model & sweep scripts
+│   │   ├── cascade2vec.py         # Core model and fast dataset loader
+│   │   ├── sweep.py               # 72-config hyperparameter sweep script
+│   │   ├── run_variance_check.py  # Multi-seed evaluation for stability
+│   │   ├── run_c2v.py             # Final model retraining & evaluation
+│   │   └── significance_test.py   # McNemar's & Bootstrap tests vs SOTA
+│   └── phase13_18/            # Future/inactive phases (Adaptive stopping, XAI, etc)
 ├── tests/
-│   └── phase04_05_graph/      # Unit tests for graph construction & snapshots
+│   ├── phase04_05_graph/          # Graph construction unit tests
+│   ├── phase06_07_features/       # Leakage and feature integrity tests
+│   └── phase11_12_cascade2vec/    # Sweep integrity and regression tests
 ├── data/
-│   ├── raw/
-│   │   ├── pheme/             # PHEME rumour-detection dataset (primary)
-│   │   └── unused_datasets/   # Twitter15, Twitter16, FakeNewsNet (inactive)
-│   ├── processed/
-│   │   ├── phase02_ingestion/ # unified.parquet (102,440 rows)
-│   │   ├── phase04_05_graph/  # vertices, edges, singletons, graph_stats Parquets
-│   │   └── phase16_17_scalability/ # synthetic_cascades.parquet
-│   └── external/
-├── notebooks/
-│   ├── phase03_eda_leakage/   # EDA & feature leakage audit (executed)
-│   ├── phase04_05_graph/      # Snapshot validation notebook & script
-│   └── phase15_xai/           # XAI notebooks (future)
+│   ├── raw/pheme/                 # PHEME rumour-detection dataset (primary)
+│   └── processed/                 # Generated parquets & trained model checkpoints
 ├── docs/
-│   ├── phase01_data_acquisition/ # design_doc.md (problem statement, hypotheses)
-│   └── phase03_eda_leakage/   # validated_features.md (leakage table)
-├── experiments/
-│   ├── phase11_12_cascade2vec/ # train_embedding.py, embedding_sweep.yaml
-│   └── phase18_eval/outputs/  # Evaluation output artefacts
+│   ├── all_phases_results_index.md    # Master index of all phase results
+│   ├── phase01_03/                # Design docs, EDA, leakage audits
+│   └── phase11_12_cascade2vec/    # Final modeling results & summaries
 ├── logs/
-│   ├── phase02_ingestion/     # data_audit.md
-│   └── phase04_05_graph/      # graph_stats.md, Spark checkpoints
+│   ├── phase08_10_sota_baselines/ # SOTA comparison metrics
+│   └── phase11_12_cascade2vec/    # Sweep logs, variance stats, t-SNE embeddings
 ├── pyproject.toml             # Package config — makes cascade2vec importable
 ├── requirements.txt           # Pinned Python dependencies
 └── README.md
