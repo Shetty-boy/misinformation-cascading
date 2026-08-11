@@ -358,98 +358,87 @@ class SnapshotDataset(Dataset):
             root_texts.append(text)
         self.tfidf_matrix = tfidf.transform(root_texts)  # sparse (C, 5000)
 
-        # Build index: list of (cascade_idx, t_minutes)
-        self.index: list[tuple[int, int]] = []
+        import collections
+        
+        # Convert to raw python lists for O(1) processing (pandas slicing is too slow for 30k graphs)
+        cascade_dict = collections.defaultdict(list)
+        for row in self.unified.to_dict('records'):
+            cascade_dict[row['cascade_id']].append(row)
+
+        self.data_list: list[Data] = []
+        
         for ci, cid in enumerate(self.cascade_ids):
-            cascade = self.unified[self.unified["cascade_id"] == cid]
+            cascade_nodes = cascade_dict[cid]
+            x_root = torch.tensor(
+                self.tfidf_matrix[ci].toarray(),
+                dtype=torch.float32,
+            )
+            label_str = self.label_map.get(cid, "non-rumour")
+            y = torch.tensor([self.le.transform([label_str])[0]], dtype=torch.long)
+            
             for t_min in self.time_windows_minutes:
-                t_s = t_min * 60
-                snap = cascade[cascade["timestamp"] <= t_s]
-                if len(snap) == 0:
+                t_s = float(t_min * 60)
+                snap_nodes = [n for n in cascade_nodes if n["timestamp"] <= t_s]
+                if not snap_nodes:
                     continue
-                self.index.append((ci, t_min))
+                
+                N = len(snap_nodes)
+                node_list = [n["tweet_id"] for n in snap_nodes]
+                snap_ids = set(node_list)
+                node_to_idx = {nid: i for i, nid in enumerate(node_list)}
+                
+                edge_src = []
+                edge_dst = []
+                edge_ts = []
+                
+                for n in snap_nodes:
+                    parent = n["parent_id"]
+                    if pd.notna(parent) and parent in snap_ids:
+                        edge_src.append(node_to_idx[parent])
+                        edge_dst.append(node_to_idx[n["tweet_id"]])
+                        edge_ts.append(float(n["timestamp"]))
+                
+                # Runtime leakage check
+                snap_dict = {
+                    "vertices": pd.DataFrame(snap_nodes).rename(columns={"tweet_id": "id"}),
+                    "edges": pd.DataFrame({
+                        "src": [n["parent_id"] for n in snap_nodes if pd.notna(n["parent_id"]) and n["parent_id"] in snap_ids],
+                        "dst": [n["tweet_id"] for n in snap_nodes if pd.notna(n["parent_id"]) and n["parent_id"] in snap_ids],
+                        "timestamp": edge_ts
+                    }) if edge_ts else pd.DataFrame(columns=["src", "dst", "timestamp"])
+                }
+                assert_snapshot_is_clean(snap_dict, t_s)
+
+                if edge_src:
+                    edge_index = torch.tensor([edge_src, edge_dst], dtype=torch.long)
+                    t_edge_s = torch.tensor(edge_ts, dtype=torch.float32)
+                    edge_weight = compute_edge_weights(t_edge_s, t_s, self.lam)
+                else:
+                    edge_index = torch.zeros((2, 0), dtype=torch.long)
+                    edge_weight = torch.zeros(0, dtype=torch.float32)
+
+                data = Data(
+                    x=x_root.expand(N, -1),
+                    edge_index=edge_index,
+                    edge_attr=edge_weight,
+                    y=y,
+                    cascade_id=cid,
+                    t_minutes=t_min,
+                    t_snapshot_s=t_s,
+                    num_nodes=N,
+                )
+                self.data_list.append(data)
 
         logger.info(
             "[SnapshotDataset] split=%s  cascades=%d  snapshots=%d",
-            split_name, len(self.cascade_ids), len(self.index),
+            split_name, len(self.cascade_ids), len(self.data_list),
         )
 
     def len(self) -> int:
-        return len(self.index)
+        return len(self.data_list)
 
     def get(self, idx: int) -> Data:
-        cascade_idx, t_min = self.index[idx]
-        cid = self.cascade_ids[cascade_idx]
-        t_s = float(t_min * 60)
-
-        cascade = self.unified[self.unified["cascade_id"] == cid].copy()
-        snap_nodes = cascade[cascade["timestamp"] <= t_s].copy()
-
-        # Verify temporal safety
-        snap_dict = {
-            "vertices": snap_nodes.rename(columns={"tweet_id": "id"}),
-            "edges": pd.DataFrame(columns=["src", "dst", "timestamp"]),
-        }
-        # Build edges from parent_id
-        snap_ids = set(snap_nodes["tweet_id"].tolist())
-        edge_rows = []
-        for _, row in snap_nodes.iterrows():
-            if pd.notna(row["parent_id"]) and row["parent_id"] in snap_ids:
-                edge_rows.append({
-                    "src": row["parent_id"],
-                    "dst": row["tweet_id"],
-                    "timestamp": row["timestamp"],
-                })
-        edges_df = pd.DataFrame(edge_rows) if edge_rows else pd.DataFrame(
-            columns=["src", "dst", "timestamp"]
-        )
-        snap_dict["edges"] = edges_df
-
-        # Runtime leakage check
-        assert_snapshot_is_clean(snap_dict, t_s)
-
-        # Build node index mapping
-        node_list = snap_nodes["tweet_id"].tolist()
-        node_to_idx = {nid: i for i, nid in enumerate(node_list)}
-        N = len(node_list)
-
-        # Node features: TF-IDF of root tweet (broadcast to all nodes in cascade)
-        x_root = torch.tensor(
-            self.tfidf_matrix[cascade_idx].toarray(),
-            dtype=torch.float32,
-        )  # (1, 5000)
-        x = x_root.expand(N, -1)  # (N, 5000)
-
-        # Edge index and weights
-        if len(edges_df) > 0:
-            src_idx = [node_to_idx[s] for s in edges_df["src"].tolist()]
-            dst_idx = [node_to_idx[d] for d in edges_df["dst"].tolist()]
-            edge_index = torch.tensor([src_idx, dst_idx], dtype=torch.long)
-
-            t_edge_s = torch.tensor(
-                edges_df["timestamp"].astype(float).tolist(), dtype=torch.float32
-            )
-            edge_weight = compute_edge_weights(t_edge_s, t_s, self.lam)
-        else:
-            edge_index = torch.zeros((2, 0), dtype=torch.long)
-            edge_weight = torch.zeros(0, dtype=torch.float32)
-
-        label_str = self.label_map.get(cid, "non-rumour")
-        y = torch.tensor(
-            self.le.transform([label_str])[0], dtype=torch.long
-        )
-
-        data = Data(
-            x=x,
-            edge_index=edge_index,
-            edge_attr=edge_weight,
-            y=y,
-            cascade_id=cid,
-            t_minutes=t_min,
-            t_snapshot_s=t_s,
-            num_nodes=N,
-        )
-        return data
+        return self.data_list[idx]
 
 
 # ---------------------------------------------------------------------------
