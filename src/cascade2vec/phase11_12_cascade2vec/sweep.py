@@ -59,6 +59,12 @@ SWEEP_FIXED = {
 
 OUT_DIR   = "logs/phase11_12_cascade2vec"
 CKPT_DIR  = "data/processed/phase11_12_cascade2vec/checkpoints"
+
+# Pipeline version tag — bump this whenever SnapshotDataset construction
+# logic changes in a way that could affect results (e.g. data representation
+# rewrite). The regression test asserts this exact string is present in the
+# sweep log, so any stale log from a prior pipeline version will fail the test.
+PIPELINE_VERSION = "v2-dict-snapshot"
 SPLIT_FILE   = "data/processed/phase08_10_sota_baselines/train_val_test_split.parquet"
 UNIFIED_FILE = "data/processed/phase02_ingestion/unified.parquet"
 SWEEP_LOG    = os.path.join(OUT_DIR, "hyperparameter_sweep.md")
@@ -112,7 +118,18 @@ def run_sweep(force: bool = False) -> dict:
     os.makedirs(OUT_DIR, exist_ok=True)
     os.makedirs(CKPT_DIR, exist_ok=True)
 
-    if os.path.exists(SWEEP_LOG) and not force:
+    INTERMEDIATE_FILE = os.path.join(OUT_DIR, "sweep_intermediate.json")
+    results = []
+    evaluated_configs = set()
+
+    if os.path.exists(INTERMEDIATE_FILE) and not force:
+        with open(INTERMEDIATE_FILE, "r") as f:
+            results = json.load(f)
+        for r in results:
+            cfg = {k: r[k] for k in SWEEP_GRID.keys()}
+            evaluated_configs.add(json.dumps(cfg, sort_keys=True))
+        logger.info("[sweep] Resuming from %d completed configs", len(results))
+    elif os.path.exists(SWEEP_LOG) and not force:
         raise RuntimeError(
             f"{SWEEP_LOG} already exists. Use --force to re-run the sweep."
         )
@@ -134,11 +151,18 @@ def run_sweep(force: bool = False) -> dict:
     configs = [dict(zip(keys, combo)) for combo in itertools.product(*values)]
     logger.info("[sweep] Total configs: %d", len(configs))
 
-    results: list[dict] = []
-    best_val_f1 = -1.0
+    best_val_f1 = max([r.get("val_macro_f1", -1.0) for r in results]) if results else -1.0
     best_config: dict[str, Any] = {}
+    if results:
+        best_row = max(results, key=lambda x: x.get("val_macro_f1", -1.0))
+        best_config = {k: best_row[k] for k in SWEEP_GRID.keys()}
 
     for i, cfg in enumerate(configs, 1):
+        cfg_str = json.dumps(cfg, sort_keys=True)
+        if cfg_str in evaluated_configs:
+            logger.info("[sweep] Config %d/%d already evaluated, skipping.", i, len(configs))
+            continue
+
         t0 = time.time()
         logger.info("[sweep] Config %d/%d: %s", i, len(configs), cfg)
 
@@ -189,6 +213,9 @@ def run_sweep(force: bool = False) -> dict:
                "runtime_s": elapsed}
         results.append(row)
 
+        with open(INTERMEDIATE_FILE, "w") as f:
+            json.dump(results, f, indent=2)
+
         if val_f1 > best_val_f1:
             best_val_f1 = val_f1
             best_config = dict(cfg)
@@ -202,6 +229,8 @@ def run_sweep(force: bool = False) -> dict:
 def _write_sweep_log(results: list[dict], best_config: dict, path: str):
     lines = [
         "# Phase 11-12: Hyperparameter Sweep Results",
+        "",
+        f"Pipeline Version: {PIPELINE_VERSION}",
         "",
         f"Total configs evaluated: {len(results)}",
         f"Fixed hyperparameters: {json.dumps(SWEEP_FIXED, indent=2)}",

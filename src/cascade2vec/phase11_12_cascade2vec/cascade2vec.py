@@ -350,12 +350,15 @@ class SnapshotDataset(Dataset):
 
         # TF-IDF root tweet text per cascade
         self.cascade_ids = sorted(split_cascade_ids & set(self.unified["cascade_id"].unique()))
-        root_texts = []
-        for cid in self.cascade_ids:
-            cascade = self.unified[self.unified["cascade_id"] == cid]
-            root_row = cascade[cascade["parent_id"].isna()]
-            text = root_row["text"].fillna("").iloc[0] if not root_row.empty else ""
-            root_texts.append(text)
+        
+        roots_series = (
+            self.unified[self.unified["parent_id"].isna()]
+            .groupby("cascade_id")["text"]
+            .first()
+            .fillna("")
+        )
+        root_texts = [roots_series.get(cid, "") for cid in self.cascade_ids]
+        
         self.tfidf_matrix = tfidf.transform(root_texts)  # sparse (C, 5000)
 
         import collections

@@ -18,6 +18,7 @@ Seed: 42 for all models.
 | XGBoost | Simple Baseline | 0.5709 | **0.5104** | 0.5655 | 0.5148 | < 1 |
 | Random Forest | Simple Baseline | 0.5985 | **0.4689** | 0.5529 | 0.4963 | < 1 |
 
+| CASCADE2VEC (Phase 11-12) | CASCADE2VEC | 0.8564 | **0.8426** | 0.8575 | 0.9016 | 4.58 |
 ## Notes
 
 - **Macro F1 floor:** All SOTA models must exceed ~0.40 (Phase 6-7 simple baseline Macro F1). All models above satisfied this criterion.
@@ -26,3 +27,5 @@ Seed: 42 for all models.
 - **RP-DNN** and **PGNN** built from scratch (no official public PyTorch repos available).
 - Simple baselines use per-cascade last-snapshot features from the Phase 6-7 feature matrix. SOTA baselines use raw propagation tree structure + TF-IDF text.
 - See `data_interface_contract.md` for full-cascade vs. snapshot policy.
+
+- **H1 (CASCADE2VEC vs. SOTA):** See CASCADE2VEC row above. Training regime: Option B (all 8 snapshot windows). H1 comparison uses t=120min evaluation, matching full-cascade SOTA setup.

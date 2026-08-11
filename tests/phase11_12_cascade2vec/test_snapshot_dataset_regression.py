@@ -218,17 +218,43 @@ class TestSnapshotDatasetRegression:
     LAM = 0.001
     SPOT_CHECK_WINDOWS = [1, 2, 5, 10, 30, 120]  # minutes
 
-    def test_no_configs_completed_pre_rewrite(self):
+    def test_sweep_log_is_post_rewrite(self):
         """
-        Verify the sweep log does NOT exist (i.e. no configs completed
-        before the SnapshotDataset rewrite). This documents that the
-        rewrite cannot have introduced mixed-pipeline results.
+        If the sweep log exists, it MUST have been produced by the v2
+        (dict-based SnapshotDataset) pipeline. sweep.py now embeds a
+        'Pipeline Version: v2-dict-snapshot' tag in the log header;
+        any log missing that tag is from the pre-rewrite pipeline and
+        must be discarded.
+
+        If the sweep has not been run yet this test skips cleanly, so it
+        never produces a spurious pass or fail on a fresh checkout.
         """
         import os
+        import pytest
+        from cascade2vec.phase11_12_cascade2vec.sweep import PIPELINE_VERSION
+
         sweep_log = "logs/phase11_12_cascade2vec/hyperparameter_sweep.md"
-        assert not os.path.exists(sweep_log), (
-            f"Sweep log {sweep_log} exists — some configs ran before the "
-            "SnapshotDataset rewrite. Those must be discarded and re-run."
+
+        if not os.path.exists(sweep_log):
+            pytest.skip("Sweep log not yet produced — nothing to validate.")
+
+        with open(sweep_log) as f:
+            content = f.read()
+
+        expected_tag = f"Pipeline Version: {PIPELINE_VERSION}"
+        assert expected_tag in content, (
+            f"Sweep log '{sweep_log}' is missing the pipeline version tag "
+            f"'{expected_tag}'. This log was likely produced by the pre-v2 "
+            "Pandas-based SnapshotDataset pipeline. Delete it and re-run "
+            "sweep.py --force to produce a clean v2 log."
+        )
+
+        # Also verify it recorded a complete run (72 configs = 4 embed_dims *
+        # 4 lams * 2 n_layers * 3 alphas, matching SWEEP_GRID in sweep.py).
+        row_count = content.count("| **")
+        assert row_count == 72, (
+            f"Expected 72 result rows in sweep log, found {row_count}. "
+            "The sweep may have run with a partial or stale intermediate file."
         )
 
     @pytest.fixture(autouse=True)
