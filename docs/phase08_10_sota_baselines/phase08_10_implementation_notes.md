@@ -227,3 +227,11 @@ All 4 models follow these shared rules:
 - **Class-weighted CrossEntropyLoss** to handle ~1.94:1 non-rumour:rumour imbalance
 - **Gradient clipping** at max_norm=1.0 for training stability
 - **TF-IDF vocabulary** built on training split only (no leakage to val/test)
+
+### Problems Encountered & Resolutions
+- **Missing or Unmaintained PyTorch SOTA Repos:** No official PyTorch code was available for RP-DNN, PGNN, or KPG (original KPG used unstable and undocumented RL).
+  - *Fix:* Built RP-DNN and PGNN entirely from scratch based on paper descriptions. Implemented a simplified version of KPG using static betweenness centrality instead of RL to guarantee reproducibility within the time budget.
+- **KeyError in Pandas Merge:** `compare_baselines.py` crashed during a DataFrame merge operation because both `feature_matrix.parquet` and the split mapping DataFrame contained a `label` column.
+  - *Fix:* Corrected the merge logic to only pull `cascade_id` and `split` from the split DataFrame, relying on the `label` column natively present in the feature matrix.
+- **Silent File Overwrites (Footgun):** The split generation script (`split_data.py`) wrote its output to a hardcoded path (`train_val_test_split.parquet`) without an explicit `--output` flag.
+  - *Fix:* Documented the problem in a repo-wide audit to ensure future scripts implement explicit overwrite guards.

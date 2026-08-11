@@ -28,6 +28,10 @@
 - 1,460 orphaned edges dropped (parent_id not found in same cascade's vertex set)
 - `persist()` used in BFS loop instead of `localCheckpoint()` to avoid Py4J re-entry in test environments
 
-### Bugs Fixed
-- BFS was originally returning flat depth=0.0 for all nodes — fixed by correcting frontier propagation logic
-- Comment in `depth.py` now correctly states the DAG guarantee as "temporal ordering + in-degree ≤ 1 → forest"
+### Problems Encountered & Resolutions
+- **BFS Returning Flat 0.0 Depth:** The initial BFS graph traversal returned a flat depth of 0.0 for all nodes due to incorrect frontier propagation.
+  - *Fix:* Corrected the frontier propagation logic and verified PySpark vs. Pandas BFS implementations are exactly identical on a regression test suite.
+- **JVM Crashes in Testing:** Using `localCheckpoint()` in the PySpark loop caused Py4J re-entry issues and JVM crashes in test environments.
+  - *Fix:* Migrated to using `.persist()` instead of `.localCheckpoint()` for the BFS iteration state.
+- **Comment Accuracy:** Graph constraints were improperly documented.
+  - *Fix:* Clarified in `depth.py` that "temporal ordering + in-degree ≤ 1 → forest".

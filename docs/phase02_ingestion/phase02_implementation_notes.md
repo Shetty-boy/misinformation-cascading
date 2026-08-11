@@ -31,3 +31,7 @@
 - Labels come from PHEME folder structure (`rumours/` vs `non-rumours/`), not tweet content
 - Cascade-level label only — every tweet in a cascade shares the same label
 - Task B (veracity classification: true/false/unverified) deferred indefinitely — not the target task
+
+### Problems Encountered & Resolutions
+- **Silent File Overwrites (Footgun):** The ingestion script (`ingest.py`) wrote its output to a hardcoded production path (`unified.parquet`), which creates a risk of accidentally overwriting the full dataset during debugging.
+  - *Fix:* Flagged this pattern in a repo-wide audit to require explicit `--output` arguments or overwrite guards for future data construction scripts.

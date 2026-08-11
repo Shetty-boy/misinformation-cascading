@@ -59,3 +59,9 @@ Computed per `(cascade_id, t)` snapshot — no future lookahead.
 - Evaluation: `StratifiedGroupKFold(n_splits=5, groups=cascade_id)` — no cascade appears in both train and test
 - Class weights tested but did not consistently improve performance
 - Two separate reported runs (full dataset vs. disconnected excluded) — both in `baseline_results.md`
+
+### Problems Encountered & Resolutions
+- **Silent Dataset Overwrite (Critical):** `build_feature_matrix.py` silently overwrote the full 5,802-cascade production `feature_matrix.parquet` with a tiny 10-cascade sample when executed with `--limit 10` during testing.
+  - *Fix:* Re-generated the full dataset (46,416 rows). Updated `build_feature_matrix.py` to enforce an `--output` path when `--limit` is passed, and added a `RuntimeError` guard preventing smaller matrices from overwriting larger ones without a `--force` flag.
+- **Markdown Rendering Crash:** `baselines_simple.py` crashed loudly with an `ImportError` when attempting to render results into markdown tables via pandas.
+  - *Fix:* Installed the missing `tabulate` dependency in the virtual environment.

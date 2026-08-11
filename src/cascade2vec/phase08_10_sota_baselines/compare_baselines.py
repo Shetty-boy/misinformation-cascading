@@ -36,39 +36,26 @@ RESULTS_JSONS = {
 SEED = 42
 
 
-def _derive_structural_features(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Derive simple structural features from unified.parquet per cascade_id.
-    Returns one row per cascade.
-    """
-    rows = []
-    for cascade_id, group in df.groupby("cascade_id"):
-        n = len(group)
-        edges = group["parent_id"].notna().sum()
-        has_root = group["parent_id"].isna().any()
-        rows.append({
-            "cascade_id": cascade_id,
-            "node_count": n,
-            "edge_count": int(edges),
-            "has_root": int(has_root),
-            "avg_text_len": group["text"].fillna("").str.len().mean(),
-        })
-    return pd.DataFrame(rows)
-
-
 def load_simple_baseline_results(split_df: pd.DataFrame) -> list[dict]:
     """
-    Re-run LR and RF on the same fixed test split using structural features
-    derived from unified.parquet (since feature_matrix.parquet may be partial).
+    Re-run LR, RF, and XGBoost on the same fixed test split using the 19 features
+    from feature_matrix.parquet at t=120.
     """
-    print("[compare] Building structural features from unified.parquet...")
-    df = pd.read_parquet(UNIFIED_FILE)
-    feat_df = _derive_structural_features(df)
+    print("[compare] Loading features from feature_matrix.parquet...")
+    df = pd.read_parquet(FEATURE_FILE)
+    
+    # Use only the final snapshot (t=120) for the final prediction
+    df = df[df["t_minutes"] == 120]
 
-    # Merge with split (label comes from split_df)
-    merged = feat_df.merge(split_df[["cascade_id", "split", "label"]], on="cascade_id")
+    # Merge with split (label is already in feature_matrix)
+    merged = df.merge(split_df[["cascade_id", "split"]], on="cascade_id", how="inner")
 
-    feature_cols = ["node_count", "edge_count", "has_root", "avg_text_len"]
+    feature_cols = [
+        "node_count", "edge_count", "max_depth", "avg_depth", "leaf_count", "leaf_ratio",
+        "branching_factor", "root_degree", "reachable_ratio", "is_connected",
+        "tweets_per_minute", "growth_velocity", "mean_interarrival", "std_interarrival",
+        "burstiness", "cascade_age", "depth_velocity", "breadth_velocity", "branching_velocity"
+    ]
 
     train = merged[merged["split"] == "train"]
     test  = merged[merged["split"] == "test"]
@@ -80,12 +67,13 @@ def load_simple_baseline_results(split_df: pd.DataFrame) -> list[dict]:
     X_train = train[feature_cols].fillna(0).values
     X_test  = test[feature_cols].fillna(0).values
 
+    import xgboost as xgb
+
     results = []
     for name, clf in [
-        ("Logistic Regression", LogisticRegression(max_iter=1000, class_weight="balanced",
-                                                    random_state=SEED)),
-        ("Random Forest",       RandomForestClassifier(n_estimators=100, class_weight="balanced",
-                                                        random_state=SEED)),
+        ("Logistic Regression", LogisticRegression(max_iter=1000, class_weight="balanced", random_state=SEED)),
+        ("Random Forest",       RandomForestClassifier(n_estimators=100, class_weight="balanced", random_state=SEED)),
+        ("XGBoost",             xgb.XGBClassifier(eval_metric="logloss", random_state=SEED, scale_pos_weight=1.94)),
     ]:
         clf.fit(X_train, y_train)
         preds = clf.predict(X_test)

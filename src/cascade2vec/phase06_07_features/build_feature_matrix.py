@@ -20,7 +20,7 @@ TIME_WINDOWS_MINUTES = [1, 2, 5, 10, 15, 30, 60, 120]
 DELTA_T_MINUTES = 5.0
 
 OUT_DIR = "data/processed/phase06_07_features"
-OUT_PATH = f"{OUT_DIR}/feature_matrix_pandas.parquet"
+OUT_PATH = f"{OUT_DIR}/feature_matrix.parquet"
 
 def _get_cascade_label(cascade_id: str, label_map: dict) -> str:
     return label_map.get(cascade_id, "unknown")
@@ -29,6 +29,8 @@ def build_feature_matrix(
     limit_cascades: int | None = None,
     time_windows: list[float] = TIME_WINDOWS_MINUTES,
     skip_disconnected: bool = False,
+    out_path: str = OUT_PATH,
+    force_overwrite: bool = False,
 ) -> pd.DataFrame:
     os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -133,8 +135,33 @@ def build_feature_matrix(
         raise RuntimeError("No rows produced — feature matrix is empty.")
 
     result_df = pd.DataFrame(rows)
-    result_df.to_parquet(OUT_PATH, index=False)
-    logger.info("[build_fm] Feature matrix written to %s", OUT_PATH)
+
+    if os.path.exists(out_path):
+        try:
+            existing_df = pd.read_parquet(out_path, columns=["cascade_id"])
+            if len(result_df) < len(existing_df):
+                if not force_overwrite:
+                    raise RuntimeError(
+                        f"Safety Guard: The new feature matrix has {len(result_df)} rows, "
+                        f"which is smaller than the existing matrix at {out_path} "
+                        f"({len(existing_df)} rows). This looks like an accidental overwrite. "
+                        f"Use --force to proceed."
+                    )
+                else:
+                    logger.warning(
+                        f"Overwriting {out_path} with a smaller matrix "
+                        f"({len(result_df)} vs {len(existing_df)} rows) because --force was passed."
+                    )
+        except Exception as e:
+            if not isinstance(e, RuntimeError):
+                logger.warning(f"Could not read existing file {out_path} for size comparison: {e}")
+            else:
+                raise
+
+    # ensure the parent directory of out_path exists
+    os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
+    result_df.to_parquet(out_path, index=False)
+    logger.info("[build_fm] Feature matrix written to %s", out_path)
 
     logger.info("[build_fm] Generating feature correlation report...")
     flag_suspicious_correlations(result_df)
@@ -144,18 +171,31 @@ def build_feature_matrix(
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     import argparse
+    import sys
+    
     parser = argparse.ArgumentParser()
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--skip-disconnected", action="store_true")
+    parser.add_argument("--output", type=str, default=None)
+    parser.add_argument("--force", action="store_true")
     args = parser.parse_args()
+
+    if args.limit is not None and args.output is None:
+        print("ERROR: You must specify an explicit --output path when using --limit to avoid overwriting the full dataset.")
+        sys.exit(1)
+
+    out_path = args.output if args.output else OUT_PATH
 
     t0 = time.time()
     df_result = build_feature_matrix(
         limit_cascades=args.limit,
         skip_disconnected=args.skip_disconnected,
+        out_path=out_path,
+        force_overwrite=args.force,
     )
     t1 = time.time()
 
     print(f"\\n=== FEATURE MATRIX COMPLETE ===")
     print(f"Shape: {df_result.shape}")
     print(f"Total runtime: {t1 - t0:.1f}s")
+    print(f"Output: {out_path}")

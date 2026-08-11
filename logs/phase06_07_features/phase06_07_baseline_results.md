@@ -14,23 +14,23 @@ Primary metric: Macro F1
 | Model               | Class Weights   |   Accuracy |   Macro F1 |   Weighted F1 |   ROC-AUC |
 |:--------------------|:----------------|-----------:|-----------:|--------------:|----------:|
 | Logistic Regression | No              |     0.6584 |     0.4037 |        0.5285 |    0.5696 |
-| Random Forest       | No              |     0.6178 |     0.4871 |        0.57   |    0.5238 |
-| XGBoost             | No              |     0.6481 |     0.4519 |        0.5569 |    0.5541 |
+| Random Forest       | No              |     0.6214 |     0.4915 |        0.5738 |    0.5251 |
+| XGBoost             | No              |     0.6486 |     0.4525 |        0.5574 |    0.5515 |
 | Logistic Regression | Yes             |     0.5597 |     0.5448 |        0.5711 |    0.5697 |
-| Random Forest       | Yes             |     0.6144 |     0.4937 |        0.5728 |    0.5007 |
-| XGBoost             | Yes             |     0.5718 |     0.5375 |        0.5778 |    0.5475 |
+| Random Forest       | Yes             |     0.6133 |     0.4929 |        0.572  |    0.4994 |
+| XGBoost             | Yes             |     0.5779 |     0.5434 |        0.5835 |    0.5513 |
 
 
 ### Disconnected Cascades Excluded
 
 | Model               | Class Weights   |   Accuracy |   Macro F1 |   Weighted F1 |   ROC-AUC |
 |:--------------------|:----------------|-----------:|-----------:|--------------:|----------:|
-| Logistic Regression | No              |     0.6578 |     0.4004 |        0.5257 |    0.5646 |
-| Random Forest       | No              |     0.6147 |     0.4867 |        0.5685 |    0.5205 |
-| XGBoost             | No              |     0.6461 |     0.4548 |        0.5578 |    0.5504 |
-| Logistic Regression | Yes             |     0.5528 |     0.538  |        0.5643 |    0.5645 |
-| Random Forest       | Yes             |     0.6125 |     0.492  |        0.5709 |    0.4993 |
-| XGBoost             | Yes             |     0.5732 |     0.5352 |        0.5776 |    0.5453 |
+| Logistic Regression | No              |     0.6577 |     0.4006 |        0.5259 |    0.5661 |
+| Random Forest       | No              |     0.6189 |     0.4924 |        0.5732 |    0.5284 |
+| XGBoost             | No              |     0.647  |     0.4545 |        0.5579 |    0.5539 |
+| Logistic Regression | Yes             |     0.5553 |     0.5409 |        0.5666 |    0.5662 |
+| Random Forest       | Yes             |     0.6164 |     0.4979 |        0.5757 |    0.5056 |
+| XGBoost             | Yes             |     0.5773 |     0.5413 |        0.5823 |    0.5516 |
 
 
 ---

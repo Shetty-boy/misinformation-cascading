@@ -11,3 +11,7 @@
 ### Key Decisions
 - Raw data kept intact under `data/raw/` — never modified in place
 - All transformations go through Phase 2 ingestion pipeline
+
+### Problems Encountered & Resolutions
+- **Nested Raw Data:** The raw dataset came as heavily nested JSON structures spanning 9 different events, making it difficult to parse uniformly.
+  - *Fix:* Reorganized raw JSON strictly into a unified project directory structure without modifying the raw data in-place, passing the burden of structuring to the Phase 2 ingestion pipeline.
