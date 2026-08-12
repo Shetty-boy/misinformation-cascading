@@ -20,8 +20,11 @@ The top 3 configs were retrained across 5 random seeds (42-46) to test if the pe
 ## 3. Statistical Significance vs Baselines
 The final CASCADE2VEC model was trained on the `best_overall` configuration (albeit with time-decay proven not to be a statistically significant factor). It was evaluated exactly once on the test split and compared against the best baseline (KPG-simplified).
 
-* **CASCADE2VEC Test Macro F1:** 0.8388
-* **KPG-simplified Test Macro F1:** 0.8311
+| Model | Macro F1 | Accuracy | Weighted F1 | ROC-AUC |
+|---|---|---|---|---|
+| **CASCADE2VEC** | 0.8388 | 0.8570 | 0.8561 | 0.8900 |
+| **KPG-simplified (SOTA best)** | 0.8311 | 0.8461 | 0.8472 | 0.9187 |
+
 * **Gap:** +0.0078
 
 We performed two rigorous tests to determine if this gap represents a genuine improvement:
