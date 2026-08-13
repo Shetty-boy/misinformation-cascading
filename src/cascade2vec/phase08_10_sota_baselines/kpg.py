@@ -146,7 +146,7 @@ def evaluate(model, loader, criterion, device) -> dict:
         auc = float("nan")
     return {"loss": total_loss / max(len(all_labels), 1),
             "macro_f1": macro_f1, "weighted_f1": weighted_f1,
-            "accuracy": acc, "roc_auc": auc}
+            "accuracy": acc, "roc_auc": auc, "probs": all_probs, "labels": all_labels}
 
 
 def train_epoch(model, loader, optimizer, criterion, device) -> float:

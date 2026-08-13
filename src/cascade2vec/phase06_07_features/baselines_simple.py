@@ -176,6 +176,7 @@ def _make_xgb(use_class_weights: bool):
 def run_baselines(
     feature_matrix_path: str = FEATURE_MATRIX_PATH,
     filter_disconnected: bool = False,
+    selected_features: list[str] | None = None,
 ) -> pd.DataFrame:
     """
     Run all baseline classifiers and return results DataFrame.
@@ -210,7 +211,10 @@ def run_baselines(
                 before - len(df), len(disc_ids), before
             )
 
-    feature_cols = _get_feature_cols(df)
+    if selected_features is not None:
+        feature_cols = selected_features
+    else:
+        feature_cols = _get_feature_cols(df)
     logger.info("[baselines] Using %d features: %s", len(feature_cols), feature_cols)
 
     # Drop rows with any NaN in feature columns

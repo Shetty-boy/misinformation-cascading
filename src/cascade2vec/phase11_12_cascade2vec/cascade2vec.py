@@ -640,5 +640,6 @@ def evaluate_c2v(
     if return_embeddings:
         metrics["embeddings"] = embeds_all
         metrics["labels"] = y_true
+        metrics["probs"] = y_prob
 
     return metrics

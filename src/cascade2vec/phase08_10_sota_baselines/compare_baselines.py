@@ -56,6 +56,13 @@ def load_simple_baseline_results(split_df: pd.DataFrame) -> list[dict]:
         "tweets_per_minute", "growth_velocity", "mean_interarrival", "std_interarrival",
         "burstiness", "cascade_age", "depth_velocity", "breadth_velocity", "branching_velocity"
     ]
+    
+    selected_features_path = "data/processed/phase06_07_features/selected_features.json"
+    if os.path.exists(selected_features_path):
+        print(f"[compare] Found selected features at {selected_features_path}")
+        with open(selected_features_path) as f:
+            feature_cols = json.load(f)
+
 
     train = merged[merged["split"] == "train"]
     test  = merged[merged["split"] == "test"]
