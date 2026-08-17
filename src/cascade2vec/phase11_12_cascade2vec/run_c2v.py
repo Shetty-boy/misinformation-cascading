@@ -253,8 +253,9 @@ def main():
         encoder, classifier, test_loader,
         device=DEVICE, return_embeddings=True,
     )
-    embeddings = test_metrics.pop("embeddings")
-    labels     = test_metrics.pop("labels")
+    embeddings = test_metrics.pop("embeddings", None)
+    labels     = test_metrics.pop("labels", None)
+    probs      = test_metrics.pop("probs", None)
 
     logger.info("[run_c2v] TEST RESULTS:")
     for k, v in test_metrics.items():

@@ -1,0 +1,7 @@
+nohup: ignoring input
+Traceback (most recent call last):
+  File "/home/dr_shetty/misinformation-cascading/src/cascade2vec/phase11_12_cascade2vec/run_c2v.py", line 36, in <module>
+    from cascade2vec.phase11_12_cascade2vec.cascade2vec import (
+  File "/home/dr_shetty/misinformation-cascading/src/cascade2vec/phase11_12_cascade2vec/cascade2vec.py", line 48, in <module>
+    from cascade2vec.phase02_ingestion.leakage_audit import assert_snapshot_is_clean
+ModuleNotFoundError: No module named 'cascade2vec.phase02_ingestion'; 'cascade2vec' is not a package

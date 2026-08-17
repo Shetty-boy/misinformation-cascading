@@ -39,8 +39,8 @@ from torch_geometric.data import Data, DataLoader as PyGDataLoader
 from torch_geometric.nn import GCNConv, global_mean_pool
 from sklearn.metrics import f1_score, accuracy_score, roc_auc_score
 
-from adapters.kpg_input import build_kpg_data
-from adapters.bigcn_input import fit_tfidf
+from cascade2vec.phase08_10_sota_baselines.adapters.kpg_input import build_kpg_data
+from cascade2vec.phase08_10_sota_baselines.adapters.bigcn_input import fit_tfidf
 
 # ── Reproducibility ──────────────────────────────────────────────────────────
 SEED = 42
@@ -216,7 +216,8 @@ def main():
         train_loss  = train_epoch(model, train_loader, optimizer, criterion, DEVICE)
         val_metrics = evaluate(model, val_loader, criterion, DEVICE)
         row = {"epoch": epoch, "train_loss": round(train_loss, 4),
-               **{f"val_{k}": round(v, 4) for k, v in val_metrics.items()}}
+               **{f"val_{k}": round(v, 4) if not isinstance(v, list) else None for k, v in val_metrics.items()}}
+        row = {k: v for k, v in row.items() if v is not None}
         log_rows.append(row)
         log.info(f"[KPG] Epoch {epoch:3d} | train_loss={train_loss:.4f} | "
                  f"val_macro_f1={val_metrics['macro_f1']:.4f} | val_acc={val_metrics['accuracy']:.4f}")
@@ -238,6 +239,8 @@ def main():
     # HARD RULE: test split accessed EXACTLY ONCE here
     model.load_state_dict(torch.load(CKPT_FILE, map_location=DEVICE))
     test_metrics = evaluate(model, test_loader, criterion, DEVICE)
+    test_metrics.pop("probs", None)
+    test_metrics.pop("labels", None)
     log.info("[KPG] === FINAL TEST RESULTS ===")
     for k, v in test_metrics.items():
         log.info(f"  {k}: {v:.4f}")

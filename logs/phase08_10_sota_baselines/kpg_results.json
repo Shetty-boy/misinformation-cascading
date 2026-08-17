@@ -19,13 +19,13 @@
     "pooling": "global_mean_pool",
     "simplification": "Static betweenness centrality key-node selection (no RL)"
   },
-  "best_val_macro_f1": 0.8610345421655612,
+  "best_val_macro_f1": 0.8586227586806402,
   "test_metrics": {
-    "loss": 0.4602236968734222,
-    "macro_f1": 0.8310516634561071,
-    "weighted_f1": 0.8471647570927068,
-    "accuracy": 0.8460654796094199,
-    "roc_auc": 0.9187189800766824
+    "loss": 0.4861015300172831,
+    "macro_f1": 0.8304175767296885,
+    "weighted_f1": 0.8449706719319119,
+    "accuracy": 0.842619184376795,
+    "roc_auc": 0.916365288264766
   },
   "runtime_minutes": 0.25,
   "seed": 42

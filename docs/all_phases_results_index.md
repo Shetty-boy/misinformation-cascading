@@ -24,3 +24,11 @@ This document serves as the central hub for all readable, human-facing result su
 
 ## Phase 02: Ingestion & Preprocessing
 - **Ingestion Log:** `logs/phase02_ingestion/ingestion_report.txt` (Contains cascade filtering statistics and dataset sizes).
+
+## Phase 13-14: Adaptive Early Stopping (H2)
+- **Summary:** [h2_summary.md](file:///home/dr_shetty/misinformation-cascading/logs/phase13_14_adaptive_stopping/h2_summary.md)
+- **Detection Delay Curve:** [detection_delay_curve.png](file:///home/dr_shetty/misinformation-cascading/logs/phase13_14_adaptive_stopping/detection_delay_curve.png)
+- **Raw Results:** [detection_results.json](file:///home/dr_shetty/misinformation-cascading/logs/phase13_14_adaptive_stopping/detection_results.json)
+
+## Phase 15: Explainability (XAI)
+- **Summary:** [xai_summary.md](file:///home/dr_shetty/misinformation-cascading/logs/phase15_xai/xai_summary.md)

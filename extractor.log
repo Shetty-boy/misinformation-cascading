@@ -1,0 +1,22 @@
+2026-08-16 12:17:06,626 Loading unified and split data...
+2026-08-16 12:17:06,935 Extracting CASCADE2VEC confidences...
+2026-08-16 12:17:06,944 [run_c2v] Loaded best config: {'embed_dim': 32, 'lam': 0.0005, 'n_layers': 2, 'alpha': 0.5}
+Traceback (most recent call last):
+  File "/home/dr_shetty/misinformation-cascading/src/cascade2vec/phase13_14_adaptive_stopping/confidence_extractor.py", line 153, in <module>
+    main()
+  File "/home/dr_shetty/misinformation-cascading/src/cascade2vec/phase13_14_adaptive_stopping/confidence_extractor.py", line 132, in main
+    c2v_df = extract_c2v_confidences(unified, split_df)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dr_shetty/misinformation-cascading/src/cascade2vec/phase13_14_adaptive_stopping/confidence_extractor.py", line 48, in extract_c2v_confidences
+    ckpt = torch.load(C2V_CKPT, map_location=DEVICE, weights_only=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dr_shetty/misinformation-cascading/venv/lib/python3.12/site-packages/torch/serialization.py", line 997, in load
+    with _open_file_like(f, 'rb') as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dr_shetty/misinformation-cascading/venv/lib/python3.12/site-packages/torch/serialization.py", line 444, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dr_shetty/misinformation-cascading/venv/lib/python3.12/site-packages/torch/serialization.py", line 425, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'data/processed/phase11_12_cascade2vec/checkpoints/final_model.pt'

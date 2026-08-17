@@ -1,0 +1,70 @@
+{
+    "c2v": {
+        "adaptive": {
+            "macro_f1": 0.8404204613782686,
+            "mdt": 79.2165422171166,
+            "median_mdt": 120.0,
+            "early_stop_pct": 34.34807581849512,
+            "mdt_rumour": 25.66891891891892,
+            "mdt_non_rumour": 106.8059181897302
+        },
+        "fixed_thresh": {
+            "macro_f1": 0.8362518206587009,
+            "mdt": 82.79379666858128,
+            "median_mdt": 120.0,
+            "early_stop_pct": 31.303848363009763,
+            "mdt_rumour": 30.986486486486488,
+            "mdt_non_rumour": 109.48651000870322
+        },
+        "fixed_120": {
+            "macro_f1": 0.8350452615681139,
+            "mdt": 120.0,
+            "median_mdt": 120.0,
+            "early_stop_pct": 0.0,
+            "mdt_rumour": 120.0,
+            "mdt_non_rumour": 120.0
+        },
+        "fixed_30": {
+            "macro_f1": 0.8346189917583163,
+            "mdt": 30.0,
+            "median_mdt": 30.0,
+            "early_stop_pct": 100.0,
+            "mdt_rumour": 30.0,
+            "mdt_non_rumour": 30.0
+        }
+    },
+    "kpg": {
+        "adaptive": {
+            "macro_f1": 0.8288356532563799,
+            "mdt": 72.4388282596209,
+            "median_mdt": 120.0,
+            "early_stop_pct": 40.03446295232625,
+            "mdt_rumour": 18.427364864864863,
+            "mdt_non_rumour": 100.26718885987816
+        },
+        "fixed_thresh": {
+            "macro_f1": 0.8385137306456325,
+            "mdt": 78.87535898908673,
+            "median_mdt": 120.0,
+            "early_stop_pct": 34.75014359563469,
+            "mdt_rumour": 25.5625,
+            "mdt_non_rumour": 106.3437771975631
+        },
+        "fixed_120": {
+            "macro_f1": 0.8310446892134504,
+            "mdt": 120.0,
+            "median_mdt": 120.0,
+            "early_stop_pct": 0.0,
+            "mdt_rumour": 120.0,
+            "mdt_non_rumour": 120.0
+        },
+        "fixed_30": {
+            "macro_f1": 0.8309937691890916,
+            "mdt": 30.0,
+            "median_mdt": 30.0,
+            "early_stop_pct": 100.0,
+            "mdt_rumour": 30.0,
+            "mdt_non_rumour": 30.0
+        }
+    }
+}

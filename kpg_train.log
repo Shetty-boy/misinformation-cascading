@@ -1,0 +1,7 @@
+nohup: ignoring input
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/dr_shetty/misinformation-cascading/src/cascade2vec/phase08_10_sota_baselines/kpg.py", line 42, in <module>
+    from adapters.kpg_input import build_kpg_data
+ModuleNotFoundError: No module named 'adapters'
